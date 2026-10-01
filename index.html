@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Valay Bundele</title>
+<meta name="description" content="Valay Bundele, PhD student in the Computer Graphics group at the University of Tübingen. Failure-aware video object tracking, vision-language models, self-supervised learning for medical imaging.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='8' width='20' height='16' rx='2' fill='none' stroke='%231E56E8' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#F6F7F9;--ink:#141A22;--mut:#5C6773;--line:#DCE1E7;--card:#FFFFFF;--acc:#1E56E8;--accbg:#E8EEFD;--good:#159C6B;--bad:#D6453D;--frame:#E6EAF0;--tile:#EEF1F5;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0F141B;--ink:#E9EDF2;--mut:#98A3B2;--line:#263040;--card:#161C25;--acc:#7AA2FF;--accbg:#1B2740;--good:#3FCB92;--bad:#F0665E;--frame:#1E2633;--tile:#1C2430}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0F141B;--ink:#E9EDF2;--mut:#98A3B2;--line:#263040;--card:#161C25;--acc:#7AA2FF;--accbg:#1B2740;--good:#3FCB92;--bad:#F0665E;--frame:#1E2633;--tile:#1C2430}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth} @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;padding-inline:16px;padding-block:0 64px}
+a{color:var(--acc);text-decoration:none} a:hover{text-decoration:underline} a:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:2px}
+h1,h2,h3{font-family:Syne,"IBM Plex Sans",sans-serif;text-wrap:balance;margin:0;line-height:1.15}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+nav{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:22px;padding-block:18px;border-bottom:1px solid var(--line)}
+nav .brand{font-family:Syne,sans-serif;font-weight:800;font-size:1.05rem;color:var(--ink);margin-right:auto;letter-spacing:.01em}
+nav a:not(.brand){color:var(--mut);font-size:.9rem;font-weight:500} nav a:not(.brand):hover{color:var(--ink);text-decoration:none}
+.wrap{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:260px minmax(0,1fr);gap:56px;padding-top:40px}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:32px;padding-top:24px}}
+aside{position:sticky;top:24px;align-self:start;display:grid;gap:14px}
+@media (max-width:860px){aside{position:static;grid-template-columns:120px 1fr;align-items:center;column-gap:20px} aside .photo{width:120px} aside .side-links{grid-column:1/-1}}
+.photo{width:200px;max-width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;border:3px solid var(--card);box-shadow:0 1px 0 var(--line)}
+aside h1{font-size:1.5rem;font-weight:800}
+.role{margin:0;color:var(--mut);font-size:.95rem;line-height:1.45}
+.side-links{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:6px;font-size:.92rem}
+.side-links li{display:flex;gap:9px;align-items:center} .side-links svg{width:16px;height:16px;flex:none;stroke:var(--mut);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+main{display:grid;gap:52px;min-width:0}
+section{display:grid;gap:14px}
+h2{font-size:1.35rem;font-weight:700;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.intro p{margin:0;max-width:68ch}
+.strip{width:100%;max-width:600px;height:auto;display:block;margin-top:4px}
+.fl{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--mut)} .fl.bad{fill:var(--bad)} .fl.acc{fill:var(--acc)}
+.caption{margin:0;font-size:.85rem;color:var(--mut)}
+.interests{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px}
+.interests li{background:var(--accbg);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:.88rem}
+.news{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.news li{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:baseline}
+.news .d{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--mut);font-variant-numeric:tabular-nums}
+.news p{margin:0}
+.pubs{list-style:none;margin:0;padding:0;display:grid;gap:16px}
+.pub{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
+@media (max-width:560px){.pub{grid-template-columns:1fr} .thumb{max-width:260px}}
+.thumb{display:block;border-radius:5px;overflow:hidden;align-self:start} .thumb img{display:block;width:100%;height:auto}
+.thumb.tile{aspect-ratio:2/1;background:var(--tile);display:flex;align-items:center;justify-content:center}
+.thumb.tile span{font-family:Syne,sans-serif;font-weight:800;font-size:1.1rem;color:var(--mut);letter-spacing:.02em}
+.pbody{display:grid;gap:4px;align-content:start}
+.pub h3{font-size:1.02rem;font-weight:700}
+.meta{margin:0} .venue{font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--acc);background:var(--accbg);padding:2px 8px;border-radius:4px}
+.authors{margin:0;font-size:.92rem;color:var(--mut)} .authors b{color:var(--ink);font-weight:600} sup{font-size:.7em}
+.desc{margin:2px 0 0;font-size:.92rem}
+.links{margin:4px 0 0;display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:.8rem;font-weight:500;border:1px solid var(--line);border-radius:4px;padding:1px 9px;color:var(--ink)} .chip:hover{border-color:var(--acc);text-decoration:none}
+.legend{margin:0;font-size:.82rem;color:var(--mut)}
+footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid var(--line);font-size:.85rem;color:var(--mut);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<nav><a class="brand" href="#top">Valay Bundele</a><a href="#about">About</a><a href="#news">News</a><a href="#publications">Publications</a></nav>
+<div class="wrap" id="top">
+<aside>
+  <img class="photo" src="assets/profile.jpg" alt="Portrait of Valay Bundele">
+  <div><h1>Valay Bundele</h1><p class="role">PhD student, Computer Graphics<br>University of Tübingen<br>IMPRS-IS scholar</p></div>
+  <ul class="side-links">
+    <li><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Tübingen, Germany</li>
+    <li><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><a href="mailto:valay.bundele@uni-tuebingen.de">valay.bundele@uni-tuebingen.de</a></li>
+    <li><svg viewBox="0 0 24 24"><path d="M3 10 12 5l9 5-9 5-9-5z"/><path d="M7 12v4c0 1.5 2.5 3 5 3s5-1.5 5-3v-4"/></svg><a href="https://scholar.google.com/citations?user=xWvW9_UAAAAJ&hl=en">Google Scholar</a></li>
+    <li><svg viewBox="0 0 24 24"><path d="M9 19c-4 1.5-4-2-6-2.5m12 4.5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.7 11.7 0 0 0-6.2 0C6.6 2.8 5.6 3.1 5.6 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4.2 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg><a href="https://github.com/Valaybundele">GitHub</a></li>
+    <li><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 12h8M12 8v8"/></svg><a href="https://openreview.net/profile?id=~Valay_Bundele1">OpenReview</a></li>
+    <li><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg><a href="https://graphics.cs.uni-tuebingen.de/team/person?name=Valay%20Bundele">Group page</a></li>
+  </ul>
+</aside>
+<main>
+<section class="intro" id="about">
+  <h2>About me</h2>
+  <p>I am a PhD student in the <a href="https://graphics.cs.uni-tuebingen.de/">Computer Graphics group</a> at the University of Tübingen, advised by <a href="https://graphics.cs.uni-tuebingen.de/team/head">Prof. Hendrik Lensch</a>, and a scholar of the <a href="https://imprs.is.mpg.de/">International Max Planck Research School for Intelligent Systems (IMPRS-IS)</a>. Before Tübingen I was at IIT Bombay, where I worked on few-shot hyperspectral image classification, domain generalization and vision-and-language navigation.</p>
+  <p>My research asks what a video tracker should do when it is wrong. Foundation trackers such as SAM 3 propagate masks confidently through occlusion, reappearance and look-alike distractors, and keep going after they have lost the target. I build trackers that notice their own failures and recover: internal signals that flag a drift, vision-language models that verify a prediction against the target, and correction agents that re-prompt the tracker only when needed. The same ideas carry into surgical video, where instrument identities must survive occlusion, and into self-supervised learning for histopathology and other medical images.</p>
+  <svg class="strip" viewBox="0 0 600 70" role="img" aria-label="A tracked box drifts off the target in one frame and is recovered in the next">
+<g transform="translate(0,0)"><rect x="0" y="0" width="112" height="70" rx="3" fill="var(--frame)"/><text x="6" y="13" class="fl">f0</text>
+<rect x="20" y="28" width="34" height="26" rx="2" fill="none" stroke="var(--good)" stroke-width="2"/></g><g transform="translate(122,0)"><rect x="0" y="0" width="112" height="70" rx="3" fill="var(--frame)"/><text x="6" y="13" class="fl">f72</text>
+<rect x="38" y="24" width="34" height="26" rx="2" fill="none" stroke="var(--good)" stroke-width="2"/></g><g transform="translate(244,0)"><rect x="0" y="0" width="112" height="70" rx="3" fill="var(--frame)"/><text x="6" y="13" class="fl">f203</text>
+<rect x="52" y="22" width="34" height="26" rx="2" fill="none" stroke="var(--good)" stroke-width="2"/></g><g transform="translate(366,0)"><rect x="0" y="0" width="112" height="70" rx="3" fill="var(--frame)"/><text x="6" y="13" class="fl">f211</text>
+<rect x="14" y="36" width="34" height="26" rx="2" fill="none" stroke="var(--bad)" stroke-width="2" stroke-dasharray="4 3"/></g><g transform="translate(488,0)"><rect x="0" y="0" width="112" height="70" rx="3" fill="var(--frame)"/><text x="6" y="13" class="fl">f215</text>
+<rect x="60" y="20" width="34" height="26" rx="2" fill="none" stroke="var(--acc)" stroke-width="2"/></g>
+<text x="372" y="66" class="fl bad">drift</text><text x="494" y="66" class="fl acc">recovered</text></svg>
+  <p class="caption">The thesis in five frames: the track holds, drifts onto a look-alike, and is caught and recovered.</p>
+  <h3 style="font-size:1rem;margin-top:8px">Research interests</h3>
+  <ul class="interests"><li>Video object segmentation and tracking</li><li>Failure detection in foundation models</li><li>Vision-language models</li><li>Self-supervised learning</li><li>Medical imaging</li></ul>
+</section>
+<section id="news">
+  <h2>News</h2>
+  <ul class="news"><li><span class="d">2026.09</span><p><b>When Trackers Fail</b>, our VLM-guided verification and recovery framework for video object segmentation, is accepted at <b>NeurIPS 2026</b>.</p></li><li><span class="d">2026.09</span><p><b>Learning Where to Focus</b> (self-supervised multi-scale ViTs for histopathology) is accepted at <b>GCPR 2026</b>.</p></li><li><span class="d">2026</span><p><b>ReMeDI</b>, refined memory for SAM 3 in surgical segmentation, is accepted at <b>MICCAI 2026</b>.</p></li><li><span class="d">2025.11</span><p>Presented our <b>self-supervised learning benchmark for medical imaging</b> at <b>BMVC 2025</b>.</p></li><li><span class="d">2025.05</span><p><b>HistDiST</b> is accepted at <b>GCPR 2025</b>, and <b>SurgTracker</b> at the <b>CVPR 2025 SynData4CV workshop</b>.</p></li></ul>
+</section>
+<section id="publications">
+  <h2>Publications</h2>
+  <p class="legend"><sup>*</sup> equal contribution. Full list on <a href="https://scholar.google.com/citations?user=xWvW9_UAAAAJ&hl=en&view_op=list_works&sortby=pubdate">Google Scholar</a>.</p>
+  <ul class="pubs"><li class="pub"><a class="thumb" href="#publications"><img src="assets/trackers_fail.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <h3>When Trackers Fail: VLM-Guided Verification and Recovery for Robust Video Object Segmentation</h3>
+  <p class="meta"><span class="venue">NeurIPS 2026</span></p>
+  <p class="authors"><b>Valay Bundele</b>, Susmit Agrawal, Mehran Hosseinzadeh, The Nam Nguyen, Hendrik P. A. Lensch</p>
+  <p class="desc">A failure-aware tracking loop around SAM 3: a vision-language verification agent checks whether the propagated mask still follows the target, and a correction agent re-prompts the tracker only when it does not. Improves SAM 3 by 1.2 and 2.7 J&amp;F on LVOS-v2 and SeCVOS.</p>
+  <p class="links"></p></div></li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2609.18578"><img src="assets/focus.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <h3>Learning Where to Focus: Self-Supervised Multi-Scale ViTs for Histopathology</h3>
+  <p class="meta"><span class="venue">GCPR 2026</span></p>
+  <p class="authors">Anabel Stammer, <b>Valay Bundele<sup>*</sup></b>, Mehran Hosseinzadeh<sup>*</sup>, Hendrik P. A. Lensch</p>
+  <p class="desc">Self-supervised multi-scale tokenization for whole-slide images: class attention decides which regions deserve fine tokens while the rest stay coarse, so capacity goes where the diagnostic signal is.</p>
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2609.18578">arXiv</a></p></div></li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2512.16880"><img src="assets/remedi.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <h3>ReMeDI: Refined Memory for Disambiguation of Identities with SAM3 in Surgical Segmentation</h3>
+  <p class="meta"><span class="venue">MICCAI 2026</span></p>
+  <p class="authors"><b>Valay Bundele</b>, Mehran Hosseinzadeh, Hendrik P. A. Lensch</p>
+  <p class="desc">Keeps instrument identities apart in surgical video with a refined SAM 3 memory: occlusion- and relevance-aware memory banks, disocclusion detection and feature-based re-identification, all without retraining the tracker.</p>
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2512.16880">arXiv</a></p></div></li><li class="pub"><a class="thumb" href="https://bmva-archive.org.uk/bmvc/2025/assets/papers/Paper_1123/paper.pdf"><img src="assets/ssl_bench.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <h3>Evaluating Self-Supervised Learning in Medical Imaging: A Benchmark for Robustness, Generalizability, and Multi-Domain Impact</h3>
+  <p class="meta"><span class="venue">BMVC 2025</span></p>
+  <p class="authors"><b>Valay Bundele<sup>*</sup></b>, Karahan Sarıtaş<sup>*</sup>, Bora Kargi<sup>*</sup>, Oğuz Ata Çal<sup>*</sup>, Kıvanç Tezören<sup>*</sup>, Zohreh Ghaderi, Hendrik P. A. Lensch</p>
+  <p class="desc">A systematic study of self-supervised pretraining on medical image classification: in-domain accuracy, robustness to distribution shift and multi-domain transfer across methods, backbones and initializations.</p>
+  <p class="links"><a class="chip" href="https://bmva-archive.org.uk/bmvc/2025/assets/papers/Paper_1123/paper.pdf">Paper</a><a class="chip" href="https://arxiv.org/abs/2412.19124">arXiv</a></p></div></li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2505.06793"><img src="assets/histdist.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <h3>HistDiST: Histopathological Diffusion-based Stain Transfer</h3>
+  <p class="meta"><span class="venue">GCPR 2025</span></p>
+  <p class="authors">Erik Großkopf<sup>*</sup>, <b>Valay Bundele<sup>*</sup></b>, Mehran Hosseinzadeh<sup>*</sup>, Hendrik P. A. Lensch</p>
+  <p class="desc">Latent diffusion for H&amp;E to IHC stain translation with dual conditioning on a pathology foundation model and a rescaled noise schedule, so structure is preserved while the stain changes.</p>
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2505.06793">arXiv</a><a class="chip" href="https://github.com/ErikGro/HistDiST">Code</a></p></div></li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2505.05722"><img src="assets/surgtracker.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <h3>You Are Your Best Teacher: Semi-Supervised Surgical Point Tracking with Cycle-Consistent Self-Distillation</h3>
+  <p class="meta"><span class="venue">CVPR 2025 Workshop (SynData4CV)</span></p>
+  <p class="authors"><b>Valay Bundele</b>, Mehran Hosseinzadeh, Hendrik P. A. Lensch</p>
+  <p class="desc">Adapts a synthetic-trained point tracker to surgical video with a frozen teacher, cycle-consistency filtering of its pseudo-labels and student fine-tuning, using only 80 unlabeled videos.</p>
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2505.05722">arXiv</a></p></div></li><li class="pub"><div class="thumb tile"><span>TMLR</span></div><div class="pbody">
+  <h3>Scaling Vision-and-Language Navigation With Offline RL</h3>
+  <p class="meta"><span class="venue">TMLR 2024</span></p>
+  <p class="authors"><b>Valay Bundele</b>, Mahesh Bhupati, Biplab Banerjee, Aditya Grover</p>
+  <p class="desc">Learning vision-and-language navigation policies from offline, suboptimal trajectory data with offline reinforcement learning.</p>
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2403.18454">arXiv</a></p></div></li><li class="pub"><div class="thumb tile"><span>WACV</span></div><div class="pbody">
+  <h3>Learning Class and Domain Augmentations for Single-Source Open-Domain Generalization</h3>
+  <p class="meta"><span class="venue">WACV 2024</span></p>
+  <p class="authors">Prathmesh Bele, <b>Valay Bundele<sup>*</sup></b>, Avigyan Bhattacharya<sup>*</sup>, Ankit Jha, Gemma Roig, Biplab Banerjee</p>
+  <p class="desc">Generalizing from a single source domain to unseen domains and unseen classes by learning class and domain augmentations jointly.</p>
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2311.02599">arXiv</a><a class="chip" href="https://doi.org/10.1109/wacv57701.2024.00183">DOI</a></p></div></li><li class="pub"><div class="thumb tile"><span>EMBC</span></div><div class="pbody">
+  <h3>Perceptual cGAN for MRI Super-resolution</h3>
+  <p class="meta"><span class="venue">EMBC 2022</span></p>
+  <p class="authors">Sahar Almahfouz Nasser, Saqib Shamsi, <b>Valay Bundele</b>, Bhavesh Garg, Amit Sethi</p>
+  <p class="desc">A conditional GAN with a perceptual loss for isotropic and anisotropic MRI super-resolution.</p>
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2201.09314">arXiv</a><a class="chip" href="https://doi.org/10.1109/embc48229.2022.9871832">DOI</a></p></div></li><li class="pub"><div class="thumb tile"><span>WACV</span></div><div class="pbody">
+  <h3>Few-Shot Open-Set Recognition of Hyperspectral Images with Outlier Calibration Network</h3>
+  <p class="meta"><span class="venue">WACV 2022</span></p>
+  <p class="authors">Debabrata Pal, <b>Valay Bundele</b>, Renuka Sharma, Biplab Banerjee, Yogananda Jeppu</p>
+  <p class="desc">Recognizing new hyperspectral classes from a few examples while rejecting unknown ones, with a calibrated outlier branch.</p>
+  <p class="links"><a class="chip" href="https://doi.org/10.1109/wacv51458.2022.00215">DOI</a></p></div></li><li class="pub"><div class="thumb tile"><span>IEEE</span></div><div class="pbody">
+  <h3>SPN: Stable Prototypical Network for Few-Shot Learning-Based Hyperspectral Image Classification</h3>
+  <p class="meta"><span class="venue">IEEE GRSL 2021</span></p>
+  <p class="authors">Debabrata Pal, <b>Valay Bundele</b>, Biplab Banerjee, Yogananda Jeppu</p>
+  <p class="desc">Variance-reduced prototypes make prototypical networks stable across few-shot episodes on hyperspectral data.</p>
+  <p class="links"><a class="chip" href="https://doi.org/10.1109/LGRS.2021.3085522">DOI</a><a class="chip" href="https://github.com/DebabrataPal7/SPN">Code</a></p></div></li></ul>
+</section>
+</main>
+</div>
+<footer><span>© 2026 Valay Bundele</span><span>Last updated October 2026</span></footer>
+</body>
+</html>
