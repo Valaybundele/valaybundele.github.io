@@ -79,7 +79,7 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
 <section class="intro" id="about">
   <h2>About me</h2>
   <p>I am a PhD student in the <a href="https://graphics.cs.uni-tuebingen.de/">Computer Graphics group</a> at the University of Tübingen, advised by <a href="https://graphics.cs.uni-tuebingen.de/team/head">Prof. Hendrik Lensch</a>, and a scholar of the <a href="https://imprs.is.mpg.de/">International Max Planck Research School for Intelligent Systems (IMPRS-IS)</a>. Before Tübingen I was at IIT Bombay, where I worked on few-shot hyperspectral image classification, domain generalization and vision-and-language navigation.</p>
-  <p>My research asks what a video tracker should do when it is wrong. Foundation trackers such as SAM 3 propagate masks confidently through occlusion, reappearance and look-alike distractors, and keep going after they have lost the target. I build trackers that notice their own failures and recover: internal signals that flag a drift, vision-language models that verify a prediction against the target, and correction agents that re-prompt the tracker only when needed. The same ideas carry into surgical video, where instrument identities must survive occlusion, and into self-supervised learning for histopathology and other medical images.</p>
+  <p>My research focuses on robust video object tracking and segmentation with foundation models such as SAM 3, in particular on detecting and recovering from tracking failures with vision-language models. I am also interested in self-supervised learning for medical imaging.</p>
   <svg class="strip" viewBox="0 0 600 70" role="img" aria-label="A tracked box drifts off the target in one frame and is recovered in the next">
 <g transform="translate(0,0)"><rect x="0" y="0" width="112" height="70" rx="3" fill="var(--frame)"/><text x="6" y="13" class="fl">f0</text>
 <rect x="20" y="28" width="34" height="26" rx="2" fill="none" stroke="var(--good)" stroke-width="2"/></g><g transform="translate(122,0)"><rect x="0" y="0" width="112" height="70" rx="3" fill="var(--frame)"/><text x="6" y="13" class="fl">f72</text>
@@ -88,7 +88,7 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
 <rect x="14" y="36" width="34" height="26" rx="2" fill="none" stroke="var(--bad)" stroke-width="2" stroke-dasharray="4 3"/></g><g transform="translate(488,0)"><rect x="0" y="0" width="112" height="70" rx="3" fill="var(--frame)"/><text x="6" y="13" class="fl">f215</text>
 <rect x="60" y="20" width="34" height="26" rx="2" fill="none" stroke="var(--acc)" stroke-width="2"/></g>
 <text x="372" y="66" class="fl bad">drift</text><text x="494" y="66" class="fl acc">recovered</text></svg>
-  <p class="caption">The thesis in five frames: the track holds, drifts onto a look-alike, and is caught and recovered.</p>
+  <p class="caption">A track that holds, drifts, and is recovered.</p>
   <h3 style="font-size:1rem;margin-top:8px">Research interests</h3>
   <ul class="interests"><li>Video object segmentation and tracking</li><li>Failure detection in foundation models</li><li>Vision-language models</li><li>Self-supervised learning</li><li>Medical imaging</li></ul>
 </section>
