@@ -7,55 +7,55 @@
 <meta name="description" content="Valay Bundele, PhD student in the Computer Graphics group at the University of Tübingen. Failure-aware video object tracking, vision-language models, self-supervised learning for medical imaging.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='8' width='20' height='16' rx='2' fill='none' stroke='%231E56E8' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-:root{--bg:#F6F7F9;--ink:#141A22;--mut:#5C6773;--line:#DCE1E7;--card:#FFFFFF;--acc:#1E56E8;--accbg:#E8EEFD;--good:#159C6B;--bad:#D6453D;--frame:#E6EAF0;--tile:#EEF1F5;color-scheme:light}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0F141B;--ink:#E9EDF2;--mut:#98A3B2;--line:#263040;--card:#161C25;--acc:#7AA2FF;--accbg:#1B2740;--good:#3FCB92;--bad:#F0665E;--frame:#1E2633;--tile:#1C2430}}
-:root[data-theme="dark"]{color-scheme:dark;--bg:#0F141B;--ink:#E9EDF2;--mut:#98A3B2;--line:#263040;--card:#161C25;--acc:#7AA2FF;--accbg:#1B2740;--good:#3FCB92;--bad:#F0665E;--frame:#1E2633;--tile:#1C2430}
+:root{--bg:#F6F7F9;--ink:#141A22;--mut:#5C6773;--line:#DCE1E7;--card:#FFFFFF;--acc:#1E56E8;--accbg:#E8EEFD;--good:#159C6B;--bad:#D6453D;--frame:#E6EAF0;--tile:#EEF1F5;--band:#E9EEF8;--shadow:0 1px 2px rgba(20,26,34,.06),0 8px 24px -12px rgba(20,26,34,.18);color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0F141B;--ink:#E9EDF2;--mut:#98A3B2;--line:#263040;--card:#161C25;--acc:#7AA2FF;--accbg:#1B2740;--good:#3FCB92;--bad:#F0665E;--frame:#1E2633;--tile:#1C2430;--band:#141B28;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6)}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0F141B;--ink:#E9EDF2;--mut:#98A3B2;--line:#263040;--card:#161C25;--acc:#7AA2FF;--accbg:#1B2740;--good:#3FCB92;--bad:#F0665E;--frame:#1E2633;--tile:#1C2430;--band:#141B28;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth} @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;padding-inline:16px;padding-block:0 64px}
+body{margin:0;background:linear-gradient(180deg,var(--band) 0,var(--band) 300px,var(--bg) 560px) no-repeat,var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;padding-inline:16px;padding-block:0 64px}
 a{color:var(--acc);text-decoration:none} a:hover{text-decoration:underline} a:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:2px}
-h1,h2,h3{font-family:Syne,"IBM Plex Sans",sans-serif;text-wrap:balance;margin:0;line-height:1.15}
+h1,h2,h3{font-family:Newsreader,Georgia,serif;text-wrap:balance;margin:0;line-height:1.15;letter-spacing:-.01em}
 .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
-nav{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:22px;padding-block:18px;border-bottom:1px solid var(--line)}
-nav .brand{font-family:Syne,sans-serif;font-weight:800;font-size:1.05rem;color:var(--ink);margin-right:auto;letter-spacing:.01em}
+nav{position:sticky;top:0;z-index:5;margin:0 -16px;padding-inline:max(16px,calc((100% - 1028px)/2));display:flex;align-items:center;gap:22px;padding-block:14px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(8px)}
+nav .brand{font-family:Newsreader,Georgia,serif;font-weight:600;font-size:1.25rem;color:var(--ink);margin-right:auto}
 nav a:not(.brand){color:var(--mut);font-size:.9rem;font-weight:500} nav a:not(.brand):hover{color:var(--ink);text-decoration:none}
 .wrap{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:260px minmax(0,1fr);gap:56px;padding-top:40px}
 @media (max-width:860px){.wrap{grid-template-columns:1fr;gap:32px;padding-top:24px}}
 aside{position:sticky;top:24px;align-self:start;display:grid;gap:14px}
 @media (max-width:860px){aside{position:static;grid-template-columns:120px 1fr;align-items:center;column-gap:20px} aside .photo{width:120px} aside .side-links{grid-column:1/-1}}
-.photo{width:200px;max-width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;border:3px solid var(--card);box-shadow:0 1px 0 var(--line)}
-aside h1{font-size:1.5rem;font-weight:800}
+.photo{width:200px;max-width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;border:4px solid var(--card);box-shadow:var(--shadow)}
+aside h1{font-size:1.9rem;font-weight:600}
 .role{margin:0;color:var(--mut);font-size:.95rem;line-height:1.45}
-.side-links{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:6px;font-size:.92rem}
+.side-links{list-style:none;margin:6px 0 0;padding:14px 0 0;border-top:1px solid var(--line);display:grid;gap:8px;font-size:.92rem}
 .side-links li{display:flex;gap:9px;align-items:center} .side-links svg{width:16px;height:16px;flex:none;stroke:var(--mut);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 main{display:grid;gap:52px;min-width:0}
 section{display:grid;gap:14px}
-h2{font-size:1.35rem;font-weight:700;padding-bottom:8px;border-bottom:1px solid var(--line)}
+h2{font-size:1.65rem;font-weight:600;padding-bottom:10px;position:relative} h2::after{content:"";position:absolute;left:0;bottom:0;width:44px;height:3px;background:var(--acc);border-radius:2px}
 .intro p{margin:0;max-width:68ch}
 .strip{width:100%;max-width:600px;height:auto;display:block;margin-top:4px}
 .fl{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--mut)} .fl.bad{fill:var(--bad)} .fl.acc{fill:var(--acc)}
 .caption{margin:0;font-size:.85rem;color:var(--mut)}
 .interests{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px}
-.interests li{background:var(--accbg);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:.88rem}
-.news{list-style:none;margin:0;padding:12px 14px;display:grid;gap:10px;max-height:230px;overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.interests li{background:var(--accbg);color:var(--ink);border:1px solid color-mix(in srgb,var(--acc) 25%,transparent);border-radius:999px;padding:4px 13px;font-size:.88rem}
+.news{list-style:none;margin:0;padding:14px 16px;display:grid;gap:10px;max-height:230px;overflow-y:auto;overscroll-behavior:contain;border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:10px;background:var(--card)}
 .news li{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:baseline}
 .news .d{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--mut);font-variant-numeric:tabular-nums}
 .news p{margin:0}
-.pubs{list-style:none;margin:0;padding:0;display:grid;gap:16px}
-.pub{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
+.pubs{list-style:none;margin:0;padding:0;display:grid;gap:14px} .yr{font-family:Newsreader,Georgia,serif;font-size:1.25rem;font-weight:600;color:var(--mut);margin:14px 0 0;display:flex;align-items:center;gap:12px} .yr::after{content:"";flex:1;height:1px;background:var(--line)} .pubs>li.yr:first-child{margin-top:0}
+.pub{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;transition:transform .15s ease,box-shadow .15s ease} .pub:hover{transform:translateY(-2px);box-shadow:var(--shadow)} @media (prefers-reduced-motion:reduce){.pub{transition:none} .pub:hover{transform:none}}
 @media (max-width:560px){.pub{grid-template-columns:1fr} .thumb{max-width:260px}}
-.thumb{display:block;border-radius:5px;overflow:hidden;align-self:start} .thumb img{display:block;width:100%;height:auto}
+.thumb{display:block;border-radius:6px;overflow:hidden;align-self:start;aspect-ratio:3/2;background:var(--tile);border:1px solid var(--line)} .thumb img{display:block;width:100%;height:100%;object-fit:contain;padding:6px;box-sizing:border-box}
 .thumb.tile{aspect-ratio:2/1;background:var(--tile);display:flex;align-items:center;justify-content:center}
-.thumb.tile span{font-family:Syne,sans-serif;font-weight:800;font-size:1.1rem;color:var(--mut);letter-spacing:.02em}
+.thumb.tile span{font-family:Newsreader,Georgia,serif;font-weight:800;font-size:1.1rem;color:var(--mut);letter-spacing:.02em}
 .pbody{display:grid;gap:4px;align-content:start}
-.pub h3{font-size:1.02rem;font-weight:700}
+.pub h3{font-size:1.15rem;font-weight:600}
 .meta{margin:0} .venue{font-family:"IBM Plex Mono",monospace;font-size:.76rem;color:var(--acc);background:var(--accbg);padding:2px 8px;border-radius:4px}
 .authors{margin:0;font-size:.92rem;color:var(--mut)} .authors b{color:var(--ink);font-weight:600} sup{font-size:.7em}
 .desc{margin:2px 0 0;font-size:.92rem}
 .links{margin:4px 0 0;display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:.8rem;font-weight:500;border:1px solid var(--line);border-radius:4px;padding:1px 9px;color:var(--ink)} .chip:hover{border-color:var(--acc);text-decoration:none}
+.chip{font-size:.8rem;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:2px 11px;color:var(--ink);transition:background .15s,border-color .15s} .chip:hover{border-color:var(--acc);background:var(--accbg);text-decoration:none}
 .sub{font-size:.95rem;font-weight:700;margin-top:4px} #service p{margin:0}
 .ta{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .ta li{display:grid;grid-template-columns:minmax(0,1fr) 170px 120px;gap:12px;align-items:baseline;padding-bottom:8px;border-bottom:1px solid var(--line)}
@@ -96,7 +96,7 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
 <section id="publications">
   <h2>Publications</h2>
   <p class="legend"><sup>*</sup> equal contribution. Full list on <a href="https://scholar.google.com/citations?user=xWvW9_UAAAAJ&hl=en&view_op=list_works&sortby=pubdate">Google Scholar</a>.</p>
-  <ul class="pubs"><li class="pub"><a class="thumb" href="#publications"><img src="assets/trackers_fail.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <ul class="pubs"><li class="yr">2026</li><li class="pub"><a class="thumb" href="#publications"><img src="assets/trackers_fail.jpg" alt="" loading="lazy"></a><div class="pbody">
   <h3>When Trackers Fail: VLM-Guided Verification and Recovery for Robust Video Object Segmentation</h3>
   <p class="meta"><span class="venue">NeurIPS 2026</span></p>
   <p class="authors"><b>Valay Bundele</b>, Susmit Agrawal, Mehran Hosseinzadeh, The Nam Nguyen, Hendrik P. A. Lensch</p>
@@ -111,7 +111,7 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
   <p class="meta"><span class="venue">MICCAI 2026</span></p>
   <p class="authors"><b>Valay Bundele</b>, Mehran Hosseinzadeh, Hendrik P. A. Lensch</p>
   <p class="desc">Keeps instrument identities apart in surgical video with a refined SAM 3 memory: occlusion- and relevance-aware memory banks, disocclusion detection and feature-based re-identification, all without retraining the tracker.</p>
-  <p class="links"><a class="chip" href="https://arxiv.org/abs/2512.16880">arXiv</a></p></div></li><li class="pub"><a class="thumb" href="https://bmva-archive.org.uk/bmvc/2025/assets/papers/Paper_1123/paper.pdf"><img src="assets/ssl_bench.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2512.16880">arXiv</a></p></div></li><li class="yr">2025</li><li class="pub"><a class="thumb" href="https://bmva-archive.org.uk/bmvc/2025/assets/papers/Paper_1123/paper.pdf"><img src="assets/ssl_bench.jpg" alt="" loading="lazy"></a><div class="pbody">
   <h3>Evaluating Self-Supervised Learning in Medical Imaging: A Benchmark for Robustness, Generalizability, and Multi-Domain Impact</h3>
   <p class="meta"><span class="venue">BMVC 2025</span></p>
   <p class="authors"><b>Valay Bundele<sup>*</sup></b>, Karahan Sarıtaş<sup>*</sup>, Bora Kargi<sup>*</sup>, Oğuz Ata Çal<sup>*</sup>, Kıvanç Tezören<sup>*</sup>, Zohreh Ghaderi, Hendrik P. A. Lensch</p>
@@ -126,7 +126,7 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
   <p class="meta"><span class="venue">CVPR 2025 Workshop (SynData4CV)</span></p>
   <p class="authors"><b>Valay Bundele</b>, Mehran Hosseinzadeh, Hendrik P. A. Lensch</p>
   <p class="desc">Adapts a synthetic-trained point tracker to surgical video with a frozen teacher, cycle-consistency filtering of its pseudo-labels and student fine-tuning, using only 80 unlabeled videos.</p>
-  <p class="links"><a class="chip" href="https://arxiv.org/abs/2505.05722">arXiv</a></p></div></li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2403.18454"><img src="assets/vln_orl.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2505.05722">arXiv</a></p></div></li><li class="yr">2024</li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2403.18454"><img src="assets/vln_orl.jpg" alt="" loading="lazy"></a><div class="pbody">
   <h3>Scaling Vision-and-Language Navigation With Offline RL</h3>
   <p class="meta"><span class="venue">TMLR 2024</span></p>
   <p class="authors"><b>Valay Bundele</b>, Mahesh Bhupati, Biplab Banerjee, Aditya Grover</p>
@@ -136,7 +136,7 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
   <p class="meta"><span class="venue">WACV 2024</span></p>
   <p class="authors">Prathmesh Bele, <b>Valay Bundele<sup>*</sup></b>, Avigyan Bhattacharya<sup>*</sup>, Ankit Jha, Gemma Roig, Biplab Banerjee</p>
   <p class="desc">Generalizing from a single source domain to unseen domains and unseen classes by learning class and domain augmentations jointly.</p>
-  <p class="links"><a class="chip" href="https://arxiv.org/abs/2311.02599">arXiv</a><a class="chip" href="https://doi.org/10.1109/wacv57701.2024.00183">DOI</a></p></div></li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2201.09314"><img src="assets/mri_sr.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2311.02599">arXiv</a><a class="chip" href="https://doi.org/10.1109/wacv57701.2024.00183">DOI</a></p></div></li><li class="yr">2022</li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2201.09314"><img src="assets/mri_sr.jpg" alt="" loading="lazy"></a><div class="pbody">
   <h3>Perceptual cGAN for MRI Super-resolution</h3>
   <p class="meta"><span class="venue">EMBC 2022</span></p>
   <p class="authors">Sahar Almahfouz Nasser, Saqib Shamsi, <b>Valay Bundele</b>, Bhavesh Garg, Amit Sethi</p>
@@ -146,7 +146,7 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
   <p class="meta"><span class="venue">WACV 2022</span></p>
   <p class="authors">Debabrata Pal, <b>Valay Bundele</b>, Renuka Sharma, Biplab Banerjee, Yogananda Jeppu</p>
   <p class="desc">Recognizing new hyperspectral classes from a few examples while rejecting unknown ones, with a calibrated outlier branch.</p>
-  <p class="links"><a class="chip" href="https://doi.org/10.1109/wacv51458.2022.00215">DOI</a></p></div></li><li class="pub"><a class="thumb" href="https://doi.org/10.1109/LGRS.2021.3085522"><img src="assets/spn.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <p class="links"><a class="chip" href="https://doi.org/10.1109/wacv51458.2022.00215">DOI</a></p></div></li><li class="yr">2021</li><li class="pub"><a class="thumb" href="https://doi.org/10.1109/LGRS.2021.3085522"><img src="assets/spn.jpg" alt="" loading="lazy"></a><div class="pbody">
   <h3>SPN: Stable Prototypical Network for Few-Shot Learning-Based Hyperspectral Image Classification</h3>
   <p class="meta"><span class="venue">IEEE GRSL 2021</span></p>
   <p class="authors">Debabrata Pal<sup>*</sup>, <b>Valay Bundele<sup>*</sup></b>, Biplab Banerjee, Yogananda Jeppu</p>
