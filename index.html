@@ -56,7 +56,7 @@ h2{font-size:1.65rem;font-weight:600;padding-bottom:10px;position:relative} h2::
 .desc{margin:2px 0 0;font-size:.92rem}
 .links{margin:4px 0 0;display:flex;gap:6px;flex-wrap:wrap}
 .chip{font-size:.8rem;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:2px 11px;color:var(--ink);transition:background .15s,border-color .15s} .chip:hover{border-color:var(--acc);background:var(--accbg);text-decoration:none}
-.sub{font-size:.95rem;font-weight:700;margin-top:4px} #service p{margin:0}
+.sub{font-size:.95rem;font-weight:700;margin-top:4px} .sub+p+.sub,.sub+p+ul{margin-top:0} #service>.sub:not(:first-of-type){margin-top:18px} #service p{margin:0}
 .ta{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .ta li{display:grid;grid-template-columns:minmax(0,1fr) 170px 120px;gap:12px;align-items:baseline;padding-bottom:8px;border-bottom:1px solid var(--line)}
 .ta li:last-child{border-bottom:0} .ta .org{color:var(--mut);font-size:.92rem} .ta .when{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--mut);text-align:right;white-space:nowrap}
@@ -104,12 +104,12 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
   <p class="meta"><span class="venue">GCPR 2026</span></p>
   <p class="authors">Anabel Stammer, <b>Valay Bundele<sup>*</sup></b>, Mehran Hosseinzadeh<sup>*</sup>, Hendrik P. A. Lensch</p>
   <p class="desc">Self-supervised multi-scale tokenization for whole-slide images: class attention decides which regions deserve fine tokens while the rest stay coarse, so capacity goes where the diagnostic signal is.</p>
-  <p class="links"><a class="chip" href="https://arxiv.org/abs/2609.18578">arXiv</a></p></div></li><li class="pub"><a class="thumb" href="https://arxiv.org/abs/2512.16880"><img src="assets/remedi.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <p class="links"><a class="chip" href="https://arxiv.org/abs/2609.18578">arXiv</a></p></div></li><li class="pub"><a class="thumb" href="https://papers.miccai.org/miccai-2026/0876-Paper5016.html"><img src="assets/remedi.jpg" alt="" loading="lazy"></a><div class="pbody">
   <h3>ReMeDI: Refined Memory for Disambiguation of Identities with SAM3 in Surgical Segmentation</h3>
   <p class="meta"><span class="venue">MICCAI 2026</span></p>
   <p class="authors"><b>Valay Bundele</b>, Mehran Hosseinzadeh, Hendrik P. A. Lensch</p>
   <p class="desc">Keeps instrument identities apart in surgical video with a refined SAM 3 memory: occlusion- and relevance-aware memory banks, disocclusion detection and feature-based re-identification, all without retraining the tracker.</p>
-  <p class="links"><a class="chip" href="https://arxiv.org/abs/2512.16880">arXiv</a></p></div></li><li class="yr">2025</li><li class="pub"><a class="thumb" href="https://bmva-archive.org.uk/bmvc/2025/assets/papers/Paper_1123/paper.pdf"><img src="assets/ssl_bench.jpg" alt="" loading="lazy"></a><div class="pbody">
+  <p class="links"><a class="chip" href="https://papers.miccai.org/miccai-2026/0876-Paper5016.html">Paper</a></p></div></li><li class="yr">2025</li><li class="pub"><a class="thumb" href="https://bmva-archive.org.uk/bmvc/2025/assets/papers/Paper_1123/paper.pdf"><img src="assets/ssl_bench.jpg" alt="" loading="lazy"></a><div class="pbody">
   <h3>Evaluating Self-Supervised Learning in Medical Imaging: A Benchmark for Robustness, Generalizability, and Multi-Domain Impact</h3>
   <p class="meta"><span class="venue">BMVC 2025</span></p>
   <p class="authors"><b>Valay Bundele<sup>*</sup></b>, Karahan Sarıtaş<sup>*</sup>, Bora Kargi<sup>*</sup>, Oğuz Ata Çal<sup>*</sup>, Kıvanç Tezören<sup>*</sup>, Zohreh Ghaderi, Hendrik P. A. Lensch</p>
