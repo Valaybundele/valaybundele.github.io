@@ -56,6 +56,11 @@ h2{font-size:1.35rem;font-weight:700;padding-bottom:8px;border-bottom:1px solid 
 .desc{margin:2px 0 0;font-size:.92rem}
 .links{margin:4px 0 0;display:flex;gap:6px;flex-wrap:wrap}
 .chip{font-size:.8rem;font-weight:500;border:1px solid var(--line);border-radius:4px;padding:1px 9px;color:var(--ink)} .chip:hover{border-color:var(--acc);text-decoration:none}
+.sub{font-size:.95rem;font-weight:700;margin-top:4px} #service p{margin:0}
+.ta{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ta li{display:grid;grid-template-columns:minmax(0,1fr) 170px 120px;gap:12px;align-items:baseline;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.ta li:last-child{border-bottom:0} .ta .org{color:var(--mut);font-size:.92rem} .ta .when{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--mut);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ta li{grid-template-columns:1fr auto} .ta .org{grid-column:1} .ta .when{grid-column:2;grid-row:1}}
 .legend{margin:0;font-size:.82rem;color:var(--mut)}
 footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid var(--line);font-size:.85rem;color:var(--mut);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 </style>
@@ -150,8 +155,16 @@ footer{max-width:1060px;margin:56px auto 0;padding-top:18px;border-top:1px solid
 </section>
 <section id="service">
   <h2>Service and teaching</h2>
-  <p><b>Reviewer</b> for NeurIPS, CVPR, ECCV, WACV, BMVC, MICCAI, TMLR and Pattern Recognition.</p>
-  <p><b>Teaching assistant</b> at the University of Tübingen for Computer Graphics (winter 2024/25) and for the practical courses Machine Learning in Graphics, Vision and Language and Vision and NLP (2024). At IIT Bombay, teaching assistant (2021) and head teaching assistant (2022) for Machine Learning for Remote Sensing II.</p>
+  <h3 class="sub">Reviewing</h3>
+  <p>NeurIPS, CVPR, ECCV, WACV, BMVC, MICCAI, TMLR, Pattern Recognition</p>
+  <h3 class="sub">Teaching assistant</h3>
+  <ul class="ta">
+    <li><span>Computer Graphics</span><span class="org">University of Tübingen</span><span class="when">Winter 2024/25</span></li>
+    <li><span>Practical Course: Machine Learning in Graphics, Vision and Language</span><span class="org">University of Tübingen</span><span class="when">Winter 2025/26</span></li>
+    <li><span>Practical Course: Vision and NLP</span><span class="org">University of Tübingen</span><span class="when">Summer 2024</span></li>
+    <li><span>Machine Learning for Remote Sensing II (head TA)</span><span class="org">IIT Bombay</span><span class="when">2022</span></li>
+    <li><span>Machine Learning for Remote Sensing II</span><span class="org">IIT Bombay</span><span class="when">2021</span></li>
+  </ul>
 </section>
 </main>
 </div>
