@@ -392,6 +392,20 @@ section.tint .mini3>div{background:var(--paper)}
 #detect .mini3 b{color:var(--det)}#diagnose .mini3 b{color:var(--diag)}
 .duo2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;max-width:1060px;margin:2rem auto 0;align-items:center}
 @media(max-width:860px){.duo2{grid-template-columns:1fr}}
+
+.find3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;max-width:1000px;margin:2.4rem auto 0}
+@media(max-width:760px){.find3{grid-template-columns:1fr}}
+.find3>div{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;padding:1rem 1.1rem 1.05rem;min-width:0}
+section.tint .find3>div{background:var(--paper)}
+.find3 .n{font-family:var(--disp);font-weight:700;font-size:1.9rem;line-height:1;letter-spacing:-.01em;color:var(--c)}
+.find3 h4{text-wrap:pretty;margin:.6rem 0 .3rem;font-size:1rem;line-height:1.3;color:var(--ink)}
+.find3 p{margin:0;font-size:.88rem;line-height:1.45;color:var(--ink2)}
+.take{max-width:1000px;margin:1.4rem auto 0;padding:.9rem 1.2rem;border-radius:12px;background:var(--cbg);border-left:4px solid var(--c);color:var(--ink);font-size:1.02rem;line-height:1.5}
+.take b{color:var(--c)}
+#detect{--c:var(--det);--cbg:var(--det-bg)}#diagnose{--c:var(--diag);--cbg:var(--diag-bg)}#commit{--c:var(--com);--cbg:var(--com-bg)}
+.st .new{font-size:.86rem;line-height:1.45;color:var(--ink2);margin-top:.55rem}
+.st .new b{color:var(--ink)}
+.st .ev{display:inline-block;margin-top:.6rem;font-family:var(--mono);font-size:.74rem;padding:.25rem .55rem;border-radius:6px;background:var(--paper);border:1px solid var(--line);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -491,11 +505,11 @@ section.tint .mini3>div{background:var(--paper)}
       <p class="lead">SAM 3 stays frozen. VIGIL only watches it and, when sure, re-prompts it.</p>
     </div>
     <div class="steps3 rv">
-      <a class="st det" href="#detect"><span class="sn">1 · Detect</span><h3>When to inspect?</h3><p>Watch SAM 3's own signals over time.</p></a>
+      <a class="st det" href="#detect"><span class="sn">1 · Detect</span><h3>When to inspect?</h3><p>Watch SAM 3's own signals over time.</p><p class="new"><b>New:</b> a training-free sequential detector that accumulates complementary evidence inside the tracker, instead of a fixed schedule or a confidence threshold.</p><span class="ev">1.4–2.0× random precision</span></a>
       <div class="sa">→</div>
-      <a class="st diag" href="#diagnose"><span class="sn">2 · Diagnose</span><h3>What is wrong?</h3><p>One VLM zooms in and proposes a fix.</p></a>
+      <a class="st diag" href="#diagnose"><span class="sn">2 · Diagnose</span><h3>What is wrong?</h3><p>One VLM judges and fixes in a single answer.</p><p class="new"><b>New:</b> identity-conditioned contrasts (same frames, different exemplar, different answer) and multi-turn zoom refined with RL.</p><span class="ev">+11.6 on the hardest identity test</span></a>
       <div class="sa">→</div>
-      <a class="st com" href="#commit"><span class="sn">3 · Commit</span><h3>Apply it?</h3><p>Only if the VLM is confident.</p></a>
+      <a class="st com" href="#commit"><span class="sn">3 · Commit</span><h3>Apply it?</h3><p>Only if the VLM is confident.</p><p class="new"><b>New:</b> the verdict is kept out of RL, so its confidence stays calibrated and decides what enters the tracker's memory.</p><span class="ev">helpful : harmful ≥ 2 : 1</span></a>
     </div>
     <div class="fig rv"><img src="static/img/fig_pipeline.jpg" alt="VIGIL pipeline: detector calls the corrector, the corrector zooms in, the gate re-seeds SAM 3" loading="lazy"></div>
   </div>
@@ -545,16 +559,15 @@ section.tint .mini3>div{background:var(--paper)}
       </svg>
     </div>
     <div class="pres rv"><b>+ Presence channel:</b> no mask, but objectness says the object is there → call the VLM.</div>
-    <div class="big3">
-      <div class="rv"><div class="n" style="color:var(--det)">1.4–2.0×</div><div class="l">the precision of random inspection<small>on SA-V, LVOS and SeCVOS; on SA-V it finds 86% of persistent failures with half of Dual-Agent's inspections</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--det)">65–84%</div><div class="l">of persistent failures caught within 1 s<small>21–34% more than random inspection, typically one or two frames after onset</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--det)">50–60%</div><div class="l">of updates land on failures in closed loop<small>random inspection: 12–22%, with the same oracle corrector</small></div></div>
+    <div class="find3">
+      <div class="rv"><div class="n">1.4–2.0×</div><h4>It inspects where failures are</h4><p>the precision of random inspection with the same count, on SA-V, LVOS and SeCVOS. On SA-V it finds 86% of persistent failures with half of Dual-Agent's inspections.</p></div>
+      <div class="rv"><div class="n">1.7–2.7×</div><h4>Confidence alone misses failures</h4><p>as many inspections needed by a threshold on SAM 3's confidence to find the same failures: SAM 3 often follows the wrong object confidently.</p></div>
+      <div class="rv"><div class="n">65–84%</div><h4>It catches failures as they begin</h4><p>of persistent failures are detected within 1 s, typically one or two frames after onset, before the wrong object fills the memory.</p></div>
+      <div class="rv"><div class="n">13–29%</div><h4>It transfers without refitting</h4><p>higher precision than random on SAM 2.1 and SeC. The best single signal changes per tracker (SeC: confidence AUROC 0.75, memory check 0.84), so combining them matters.</p></div>
+      <div class="rv"><div class="n">58–83%</div><h4>Empty masks need their own channel</h4><p>of the failures found by presence monitoring are missed by mask-based evidence; it adds 19–27 points of recall.</p></div>
+      <div class="rv"><div class="n">50–60%</div><h4>It keeps working in closed loop</h4><p>of updates land on failures when corrections change the tracker's memory, against 12–22% for random inspection.</p></div>
     </div>
-    <div class="mini3">
-      <div class="rv"><b>1.7–2.7×</b>as many inspections needed by a threshold on SAM 3's confidence to find the same failures: SAM 3 often follows the wrong object confidently</div>
-      <div class="rv"><b>13–29%</b>higher precision than random on SAM 2.1 and SeC, without refitting. SeC's own confidence is a weak signal (AUROC 0.75), but the memory check stays strong (0.84)</div>
-      <div class="rv"><b>58–83%</b>of the failures found by the presence channel are missed by the mask-based inspections; it adds 19–27 points of recall</div>
-    </div>
+    <p class="take rv"><b>Insight:</b> a failure is a pattern over several frames and several signals, not a low score on a single frame.</p>
   </div>
 </section>
 
@@ -580,18 +593,12 @@ section.tint .mini3>div{background:var(--paper)}
     </div>
     <div class="fig rv" style="max-width:980px;margin-inline:auto"><img src="static/img/crop_dialogue_v2.jpg" alt="The VLM zooms on SAM 3's mask, then on the target, then re-seeds SAM 3" loading="lazy"></div>
     <p class="figcap">Target: 0.3% of the frame. Zoom 1: SAM 3 is on a child. Zoom 2: the target, as in the exemplar. Answer: re-seed.</p>
-    <div class="big3">
-      <div class="rv"><div class="n" style="color:var(--diag)">+11.6</div><div class="l">points on the hardest identity test<small>it follows the exemplar, not position (46.8 → 58.4%)</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--diag)">39 / 45</div><div class="l">re-detections from a crop help<small>on LVOS and SA-V</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--diag)">+0.8</div><div class="l">J&amp;F from zoom on SA-V, after GRPO<small>scripted zoom alone does not help (85.1 → 84.8)</small></div></div>
+    <div class="find3">
+      <div class="rv"><div class="n">+11.6</div><h4>It follows the exemplar, not position</h4><p>points on the hardest identity test (46.8 → 58.4%), where two objects of the same kind compete and only appearance can decide.</p></div>
+      <div class="rv"><div class="n">39 / 45</div><h4>Zoom makes small targets decidable</h4><p>re-detections from a crop help (LVOS and SA-V). On LVOS, the crop covers at least half of a present target in 79% of calls.</p></div>
+      <div class="rv"><div class="n">+0.8</div><h4>Zoom pays off only after RL</h4><p>J&amp;F on SA-V from zoom after GRPO. Scripted zoom alone does not help (85.1 → 84.8): the model must learn where to look.</p></div>
     </div>
-    <div class="mini3">
-      <div class="rv"><b>79%</b>of LVOS crops cover at least half of a present target; all 27 erasures on LVOS help or leave J unchanged</div>
-      <div class="rv"><b>0.67 → 0.73</b>help-vs-hurt AUROC of the verdict confidence on SA-V without vs with zoom (LVOS: 0.68 → 0.77): zoom also makes the gate more selective</div>
-      <div class="rv"><b>3.3×</b>faster than Dual-Agent: one 4B model judges and fixes, instead of an 8B verifier and a 4B corrector; fits a 24 GB GPU</div>
-    </div>
-    <div class="fig rv" style="max-width:860px;margin-inline:auto"><img src="static/img/identity_test_examples.jpg" alt="Identity test: the same query frame with either exemplar; with identity contrasts the choice follows the exemplar" loading="lazy"></div>
-    <p class="figcap">Identity test: same frames, two exemplars. With identity contrasts the choice follows the exemplar; without, it often picks the same object for both.</p>
+    <p class="take rv"><b>Insight:</b> recovering the right object needs identity read from the exemplar, and a closer look when the target is small.</p>
   </div>
 </section>
 
@@ -620,11 +627,12 @@ section.tint .mini3>div{background:var(--paper)}
     </div>
       <div class="rv"><div class="fig" style="margin-top:0"><img src="static/img/fig_gate_help_share.png" alt="Share of helpful fixes rises with verdict confidence" loading="lazy"></div><p class="figcap">The share of helpful fixes rises with confidence. Dashed: the gate.</p></div>
     </div>
-    <div class="big3">
-      <div class="rv"><div class="n" style="color:var(--com)">≥ 2 : 1</div><div class="l">helpful to harmful fixes above the gate<small>SA-V 2 : 1, LVOS 2.6 : 1</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--com)">0.77 → 0.48</div><div class="l">help-vs-hurt AUROC on LVOS<small>when RL trains on the reward alone, without verdict supervision: chance level</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--com)">0.11 vs 0.41</div><div class="l">calibration error (ECE) on LVOS<small>with vs without verdict supervision; SA-V: 0.05 vs 0.24</small></div></div>
+    <div class="find3">
+      <div class="rv"><div class="n">≥ 2 : 1</div><h4>Confidence predicts which fixes help</h4><p>helpful to harmful fixes above the gate (SA-V 2 : 1, LVOS 2.6 : 1). Below it, harmful fixes dominate.</p></div>
+      <div class="rv"><div class="n">0.77 → 0.48</div><h4>RL on the reward alone breaks it</h4><p>help-vs-hurt AUROC on LVOS without verdict supervision, i.e. chance; calibration error rises from 0.11 to 0.41.</p></div>
+      <div class="rv"><div class="n">0.67 → 0.73</div><h4>Zoom makes the gate more selective</h4><p>help-vs-hurt AUROC on SA-V without vs with zoom (LVOS: 0.68 → 0.77), so the gate admits more reliable fixes.</p></div>
     </div>
+    <p class="take rv"><b>Insight:</b> self-correction helps only when the corrector knows when to abstain. Applying every fix makes SAM 3 worse; gating makes it better on every benchmark.</p>
   </div>
 </section>
 
