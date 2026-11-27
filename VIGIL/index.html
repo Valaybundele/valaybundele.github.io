@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VIGIL: Evidence-Driven Failure Diagnosis and Recovery for Video Object Segmentation</title>
+<meta name="description" content="VIGIL lets a frozen SAM 3 notice its own tracking failures, inspect them with a zooming VLM, and correct its memory only when the correction is reliable.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f8f7f3; --paper2:#efede6; --card:#ffffff; --ink:#0e1726; --ink2:#3c4658; --mute:#6a7385; --line:#e1ded4;
+  --det:#2f6fe4; --det-bg:#eaf1fd; --diag:#e2723a; --diag-bg:#fdf0e8; --com:#1c9a6a; --com-bg:#e6f5ee;
+  --sam:#e5484d; --ev:#8b6fd1; --nomask:#3fb7c9;
+  --disp:'Space Grotesk',ui-sans-serif,system-ui,sans-serif; --body:'Inter',ui-sans-serif,system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+img,video{max-width:100%;display:block}
+a{color:var(--det);text-decoration:none} a:hover{text-decoration:underline}
+h1,h2,h3,h4{font-family:var(--disp);line-height:1.15;margin:0;text-wrap:balance}
+.wrap{max-width:1140px;margin:0 auto;padding-inline:max(20px,env(safe-area-inset-left,0px))}
+.narrow{max-width:760px}
+/* nav */
+.nav{position:sticky;top:0;z-index:40;background:rgba(248,247,243,.88);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:.2rem 1.1rem;padding-block:.65rem;flex-wrap:wrap}
+.logo{font-family:var(--disp);font-weight:700;letter-spacing:.18em;color:var(--ink);margin-right:auto;display:flex;align-items:center;gap:.5rem}
+.logo i{width:10px;height:10px;border-radius:50%;background:var(--com);box-shadow:0 0 0 4px rgba(28,154,106,.18);animation:blink 2.6s ease-in-out infinite}
+@keyframes blink{50%{box-shadow:0 0 0 7px rgba(28,154,106,.05)}}
+.nav a.nl{color:var(--ink2);font-size:.93rem;font-weight:500}
+.nav a.nl:hover{color:var(--ink);text-decoration:none}
+@media(max-width:760px){.nav a.nl{display:none}}
+/* hero */
+.hero{padding:4.2rem 0 2.5rem;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(14,23,38,.08) 1px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(#000,transparent 75%);-webkit-mask-image:linear-gradient(#000,transparent 75%);pointer-events:none}
+.hero .wrap{position:relative}
+.kicker{display:inline-flex;gap:.5rem;align-items:center;font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:.3rem .8rem}
+.kicker b{color:var(--com)}
+.word{font-family:var(--disp);font-weight:700;font-size:clamp(4rem,13vw,9.5rem);letter-spacing:.06em;line-height:.9;margin:1.4rem 0 .2rem;color:var(--ink)}
+.word span{color:var(--com)}
+h1.title{font-size:clamp(1.35rem,2.6vw,1.95rem);font-weight:600;max-width:900px;color:var(--ink)}
+.sub{font-size:clamp(1.05rem,1.6vw,1.22rem);color:var(--ink2);max-width:780px;margin:1rem 0 1.3rem}
+.sub b{color:var(--ink)}
+.authors{font-size:1rem;color:var(--ink2)} .authors a{color:var(--ink);border-bottom:1px solid var(--line)} .authors a:hover{text-decoration:none;border-color:var(--ink)}
+.affil{color:var(--mute);font-size:.95rem}
+.btns{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.3rem}
+.btn{display:inline-flex;align-items:center;gap:.45rem;font-weight:600;font-size:.95rem;padding:.6rem 1.1rem;border-radius:10px;border:1px solid var(--ink);color:var(--ink);background:var(--card);transition:transform .15s,background .15s}
+.btn:hover{text-decoration:none;transform:translateY(-1px);background:var(--paper2)}
+.btn.dark{background:var(--ink);color:#fff} .btn.dark:hover{background:#22304a}
+.btn svg{width:16px;height:16px}
+.herogrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:2.2rem;align-items:end}
+@media(max-width:940px){.herogrid{grid-template-columns:1fr}}
+/* evidence trace */
+.trace{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem 1rem .6rem;box-shadow:0 20px 50px -30px rgba(14,23,38,.35)}
+.trace .lbl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.74rem;color:var(--mute);margin-bottom:.3rem;gap:.5rem;flex-wrap:wrap}
+.trace svg{width:100%;height:auto;overflow:visible}
+.trace .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:.5rem}
+.trace .steps div{font-size:.82rem;line-height:1.35;color:var(--ink2);border-top:3px solid;padding-top:.4rem}
+.trace .steps b{display:block;font-family:var(--disp);font-size:.92rem;color:var(--ink)}
+.s-det{border-color:var(--det)!important}.s-diag{border-color:var(--diag)!important}.s-com{border-color:var(--com)!important}
+#evpath{stroke-dasharray:900;stroke-dashoffset:900;animation:draw 7s linear infinite}
+@keyframes draw{0%{stroke-dashoffset:900}55%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+.mk{opacity:0;animation:pop 7s linear infinite}
+.mk.call{animation-delay:0s}
+@keyframes pop{0%,38%{opacity:0}41%,100%{opacity:1}}
+.mk.zoom{animation-name:pop2} @keyframes pop2{0%,44%{opacity:0}47%,100%{opacity:1}}
+.mk.fix{animation-name:pop3} @keyframes pop3{0%,52%{opacity:0}55%,100%{opacity:1}}
+@media(prefers-reduced-motion:reduce){#evpath{animation:none;stroke-dashoffset:0}.mk{animation:none;opacity:1}.logo i{animation:none}}
+/* hero video */
+.player{margin-top:2.4rem;background:#161a22;border-radius:16px;overflow:hidden;box-shadow:0 30px 70px -35px rgba(14,23,38,.6)}
+.player video{width:100%}
+.player .cap{color:#d9dee8;font-size:.95rem;padding:.75rem 1rem .9rem;display:flex;gap:.6rem 1.2rem;flex-wrap:wrap;align-items:center}
+.player .cap b{color:#fff}
+.key{display:inline-flex;gap:.9rem;flex-wrap:wrap;font-size:.82rem;color:#aab3c4;margin-left:auto}
+.key span:before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--c)}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;margin-top:1.6rem}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.05rem 1.1rem;min-width:0}
+.stat .n{font-family:var(--disp);font-weight:700;font-size:2.15rem;line-height:1;letter-spacing:-.01em}
+.stat .t{font-weight:600;margin-top:.45rem;line-height:1.35}
+.stat .d{color:var(--mute);font-size:.88rem;margin-top:.25rem;line-height:1.4}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.stats{grid-template-columns:1fr}}
+/* sections */
+section{padding:5rem 0}
+section.tint{background:var(--card);border-block:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:.6rem}
+.eyebrow .num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;color:#fff;font-weight:600;letter-spacing:0;background:var(--ink)}
+h2{font-size:clamp(1.7rem,3.2vw,2.5rem);font-weight:700;letter-spacing:-.015em;margin:.7rem 0 .9rem;max-width:880px}
+.lead{font-size:1.12rem;color:var(--ink2);max-width:780px;margin:0}
+.lead b{color:var(--ink)}
+/* three questions */
+.q3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:2rem}
+@media(max-width:900px){.q3{grid-template-columns:1fr}}
+.q{border-radius:16px;padding:1.35rem 1.35rem 1.25rem;border:1px solid;min-width:0;position:relative}
+.q.det{background:var(--det-bg);border-color:#c9d9f8}.q.diag{background:var(--diag-bg);border-color:#f4d2bf}.q.com{background:var(--com-bg);border-color:#bfe3d2}
+.q .tag{font-family:var(--mono);font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.q.det .tag{color:var(--det)}.q.diag .tag{color:var(--diag)}.q.com .tag{color:var(--com)}
+.q h3{font-size:1.35rem;margin:.35rem 0 .55rem}
+.q p{margin:0;color:var(--ink2);font-size:.98rem}
+.q ul{margin:.7rem 0 0;padding-left:1.1rem;color:var(--ink2);font-size:.95rem}
+.q li{margin:.2rem 0}
+.fig{margin:2.2rem 0 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.fig img{width:100%;border-radius:8px}
+.figcap{color:var(--mute);font-size:.93rem;margin:.7rem auto 0;max-width:900px;text-align:center}
+/* findings */
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2.2rem;align-items:start;margin-top:2.2rem}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+.finding{border-left:4px solid var(--c,var(--ink));padding:.15rem 0 .15rem 1.1rem;margin:0 0 1.6rem}
+.finding h3{font-size:1.25rem;margin-bottom:.35rem}
+.finding p{margin:0;color:var(--ink2)}
+.finding p b{color:var(--ink)}
+.det-c{--c:var(--det)}.diag-c{--c:var(--diag)}.com-c{--c:var(--com)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.15rem 1.2rem 1rem;min-width:0}
+section.tint .panel{background:var(--paper)}
+.panel h4{font-size:1rem;margin-bottom:.15rem}
+.panel .hint{font-size:.85rem;color:var(--mute);margin:0 0 .9rem}
+/* bars */
+.bars{display:grid;gap:.55rem}
+.brow{display:grid;grid-template-columns:110px minmax(0,1fr);gap:.7rem;align-items:center}
+.brow .bl{font-size:.88rem;font-weight:600;color:var(--ink2);line-height:1.2}
+.bpair{display:grid;gap:4px}
+.bar{position:relative;height:20px;background:var(--paper2);border-radius:5px}
+section.tint .bar{background:#e8e5dc}
+.bar i{position:absolute;inset:0 auto 0 0;width:0;border-radius:5px;background:var(--c);transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.bar em{position:absolute;left:calc(var(--w) + 8px);top:50%;transform:translateY(-50%);font-style:normal;font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--ink);white-space:nowrap}
+.in .bar i{width:var(--w)}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.84rem;color:var(--ink2);margin-top:.8rem}
+.legend span:before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+/* big compare */
+.vs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+.vs>div{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:.9rem;min-width:0}
+section.tint .vs>div{background:var(--card)}
+.vs .n{font-family:var(--disp);font-size:2rem;font-weight:700;line-height:1}
+.vs .t{font-size:.85rem;color:var(--mute);margin-top:.3rem;line-height:1.35}
+/* code */
+.json{font-family:var(--mono);font-size:.86rem;background:#141a26;color:#dfe6f2;border-radius:12px;padding:1rem 1.1rem;overflow-x:auto;line-height:1.6;margin:1.1rem 0 0}
+.json .k{color:#9ec1ff}.json .s{color:#ffb38a}.json .v{color:#7ee0b2}.json .c{color:#7d879a}
+/* gate chart */
+.gate{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.gcol h5{font-family:var(--disp);font-size:.95rem;margin:0 0 .5rem}
+.gbars{display:flex;align-items:flex-end;gap:10px;height:190px;border-bottom:1px solid var(--line);padding:0 4px}
+.gb{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;min-width:0}
+.gb i{display:block;width:100%;height:0;border-radius:6px 6px 2px 2px;background:var(--c);transition:height 1.1s cubic-bezier(.2,.8,.2,1)}
+.in .gb i{height:var(--h)}
+.gb b{font-family:var(--mono);font-size:.82rem;margin-bottom:4px}
+.glab{display:flex;gap:10px;padding:0 4px;margin-top:.4rem}
+.glab span{flex:1;font-size:.76rem;color:var(--mute);text-align:center;line-height:1.25;min-width:0}
+/* tables */
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin:1.8rem 0 .9rem}
+.tab{font:600 .92rem var(--body);padding:.5rem .95rem;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink2);cursor:pointer}
+.tab[aria-selected=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.95rem}
+th,td{padding:.6rem .8rem;text-align:right;white-space:nowrap;border-bottom:1px solid #eeebe3}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);font-weight:600;background:var(--paper)}
+tbody tr:last-child td{border-bottom:none}
+tr.grp td{font-size:.78rem;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;background:#fcfbf8;padding-block:.35rem}
+tr.ours td{background:var(--com-bg);font-weight:700}
+tr.ours td:first-child{color:var(--com)}
+.up{color:var(--com);font-size:.78em;font-weight:700;margin-left:.3rem}
+.na{color:#b5b9c2}
+.note{font-size:.86rem;color:var(--mute);margin-top:.6rem}
+.cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:2.2rem}
+@media(max-width:900px){.cards3{grid-template-columns:1fr}}
+/* gallery */
+.gal{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:1.2rem;margin-top:2rem;align-items:start}
+@media(max-width:980px){.gal{grid-template-columns:1fr}}
+.stage{background:#161a22;border-radius:14px;overflow:hidden}
+.stage .meta{color:#dfe5ef;padding:.8rem 1rem 1rem}
+.stage .meta h4{color:#fff;font-size:1.08rem;margin-bottom:.2rem}
+.stage .meta p{margin:0;font-size:.94rem;color:#c3cad8}
+.ds{font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.05em;padding:.12rem .45rem;border-radius:5px;background:rgba(255,255,255,.12);color:#fff;margin-right:.4rem;vertical-align:2px}
+.filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem}
+.thumbs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem}
+@media(max-width:980px){.thumbs{grid-template-columns:repeat(3,minmax(0,1fr));max-height:none}}
+@media(max-width:560px){.thumbs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.th{border:2px solid transparent;border-radius:10px;overflow:hidden;cursor:pointer;background:var(--card);padding:0;text-align:left;font:inherit;color:inherit}
+.th img{aspect-ratio:1280/747;object-fit:cover;width:100%}
+.th span{display:block;font-size:.74rem;line-height:1.3;padding:.35rem .45rem;color:var(--ink2)}
+.th[aria-current=true]{border-color:var(--ink)}
+.th[hidden]{display:none}
+.howto{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin-top:1rem}
+@media(max-width:760px){.howto{grid-template-columns:1fr}}
+.howto div{font-size:.88rem;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.7rem .8rem}
+.howto b{color:var(--ink)}
+/* bib */
+.bib{position:relative;background:#141a26;color:#dfe6f2;border-radius:14px;padding:1.1rem 1.2rem;overflow-x:auto;margin-top:1.4rem}
+.bib pre{margin:0;font-family:var(--mono);font-size:.86rem;line-height:1.6}
+.copy{position:absolute;top:.7rem;right:.7rem;font:600 .8rem var(--body);background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:.35rem .7rem;cursor:pointer}
+footer{padding:2.2rem 0 3rem;color:var(--mute);font-size:.9rem;text-align:center}
+/* reveal */
+.rv{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.bar i,.gb i{transition:none}}
+:focus-visible{outline:2px solid var(--det);outline-offset:2px}
+/* components + insights */
+.comp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin-top:1.8rem}
+@media(max-width:900px){.comp{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.comp{grid-template-columns:1fr}}
+.comp div{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;padding:.8rem .9rem;font-size:.9rem;line-height:1.4;color:var(--ink2);min-width:0}
+section.tint .comp div{background:var(--paper)}
+.comp b{display:block;font-family:var(--disp);font-size:1rem;color:var(--ink);margin-bottom:.2rem}
+.comp.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:900px){.comp.c4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.comp.c4{grid-template-columns:1fr}}
+.ins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+.ins.one{grid-template-columns:1fr}
+@media(max-width:560px){.ins{grid-template-columns:1fr}}
+.ins>div{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:12px;padding:.9rem 1rem;min-width:0}
+section.tint .ins>div{background:var(--paper)}
+.ins .n{font-family:var(--disp);font-weight:700;font-size:1.65rem;line-height:1;color:var(--c)}
+.ins h3{font-size:1.05rem;margin:.4rem 0 .25rem}
+.ins p{margin:0;font-size:.9rem;line-height:1.45;color:var(--ink2)}
+/* detector flow */
+.flow{display:grid;grid-template-columns:minmax(0,1.5fr) 28px minmax(0,1fr) 28px minmax(0,.55fr);grid-template-areas:"ev a1 acc a2 call" "pr pr pr a3 call";gap:.8rem .4rem;margin-top:1.8rem;align-items:stretch}
+.fstep{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.9rem 1rem;min-width:0}
+.fh{font-family:var(--disp);font-weight:600;font-size:1rem;margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.fh span{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--det);color:#fff;font-size:.8rem}
+.fgrp{background:var(--det-bg);border:1px solid #c9d9f8;border-radius:10px;padding:.65rem .8rem;margin-top:.55rem;font-size:.88rem;line-height:1.4;color:var(--ink2)}
+.fgrp b{color:var(--ink);font-family:var(--disp)}
+.fgrp ul,.fgrp ol{margin:.35rem 0 0;padding-left:1.1rem}.fgrp li{margin:.15rem 0}
+.fgrp em{font-style:normal;font-weight:600;color:var(--ink)}
+.fgrp small,.fcall small{display:block;color:var(--mute);margin-top:.35rem;font-size:.8rem}
+.farr{display:grid;place-items:center;color:var(--det);font-size:1.4rem;font-weight:700}
+.fcall{background:var(--det);color:#fff;border-radius:14px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:1rem .6rem;font-family:var(--disp);font-size:1.05rem}
+.fcall small{color:#dbe6fb}
+.fpres p{margin:0;font-size:.9rem;color:var(--ink2);line-height:1.45}
+.fpres .fh{margin-bottom:.35rem}
+@media(max-width:900px){.flow{grid-template-columns:1fr;grid-template-areas:"ev" "a1" "acc" "pr" "a2" "call"}.farr{transform:rotate(90deg);height:24px}.flow>.farr[style*=a3]{display:none}}
+.grp2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem;margin-top:1.8rem}
+@media(max-width:900px){.grp2{grid-template-columns:1fr}}
+.grp2 .comp{grid-template-columns:1fr;margin-top:.5rem}
+.glabel{font-family:var(--mono);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--diag);font-weight:600}
+/* v2 */
+.subh{font-size:1.25rem;margin:2.6rem 0 1rem;font-family:var(--mono);font-weight:600;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.ins3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem}
+@media(max-width:900px){.ins3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.ins3{grid-template-columns:1fr}}
+.ins3.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:560px){.ins3.c2{grid-template-columns:1fr}}
+.ic{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:1rem 1.1rem;min-width:0}
+section.tint .ic{background:var(--paper)}
+.ic .n{font-family:var(--disp);font-weight:700;font-size:1.9rem;line-height:1;color:var(--c)}
+.ic .n small{font-size:.55em;color:var(--mute);font-weight:600}
+.ic h3{font-size:1.08rem;margin:.5rem 0 .3rem}
+.ic p{margin:0;font-size:.9rem;line-height:1.45;color:var(--ink2)}
+.mb{margin-top:.8rem;display:grid;gap:5px}
+.mr{display:grid;grid-template-columns:6.6em minmax(0,1fr) 2.9em;gap:.5rem;align-items:center;font-size:.78rem;color:var(--ink2)}
+.mb.big .mr{grid-template-columns:8.6em minmax(0,1fr) 3.2em;font-size:.86rem}
+.mt{height:10px;background:var(--paper2);border-radius:4px;overflow:hidden}
+.mb.big .mt{height:16px}
+section.tint .mt{background:#e8e5dc}
+.mt i{display:block;height:100%;width:var(--w);background:var(--c);border-radius:4px}
+.mr em{font-style:normal;font-family:var(--mono);font-weight:600;color:var(--ink);text-align:right}
+.mcap{font-size:.72rem;color:var(--mute);margin-top:2px}
+/* diverging */
+.dv{display:grid;gap:.75rem;margin-top:.4rem}
+.dvr{display:grid;grid-template-columns:72px minmax(0,1fr);gap:.6rem;align-items:center}
+.dvl{font-size:.88rem;font-weight:600;color:var(--ink2)}
+.dvt{position:relative;display:grid;gap:4px;padding:2px 0}
+.dvt:before{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;border-left:1px solid var(--ink);opacity:.35}
+.dvb{position:relative;height:18px}
+.dvb i{position:absolute;top:0;bottom:0;left:50%;width:calc(var(--w) * .8);background:var(--c);border-radius:0 4px 4px 0}
+.dvb i.neg{left:auto;right:50%;border-radius:4px 0 0 4px}
+.dvb em{position:absolute;top:50%;transform:translateY(-50%);left:calc(50% + var(--w) * .8 + 6px);font-style:normal;font-family:var(--mono);font-size:.78rem;font-weight:600}
+.dvb em.neg{left:auto;right:calc(50% + var(--w) * .8 + 6px);color:#c0393e}
+/* method steps */
+.steps3{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr) 24px minmax(0,1fr);gap:.4rem;margin-top:2rem;align-items:stretch}
+@media(max-width:900px){.steps3{grid-template-columns:1fr}.sa{transform:rotate(90deg)}}
+.sa{display:grid;place-items:center;font-size:1.4rem;color:var(--mute);font-weight:700}
+.st{display:block;border-radius:16px;padding:1.2rem 1.25rem;border:1px solid;color:var(--ink);transition:transform .15s}
+.st:hover{text-decoration:none;transform:translateY(-2px)}
+.st.det{background:var(--det-bg);border-color:#c9d9f8}.st.diag{background:var(--diag-bg);border-color:#f4d2bf}.st.com{background:var(--com-bg);border-color:#bfe3d2}
+.sn{font-family:var(--mono);font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.st.det .sn,.st.det .go{color:var(--det)}.st.diag .sn,.st.diag .go{color:var(--diag)}.st.com .sn,.st.com .go{color:var(--com)}
+.st h3{font-size:1.3rem;margin:.35rem 0 .45rem}
+.st p{margin:0 0 .7rem;color:var(--ink2);font-size:.95rem}
+.go{font-family:var(--mono);font-size:.76rem;font-weight:600}
+/* corrector io */
+.io{display:grid;grid-template-columns:minmax(0,1.2fr) 24px minmax(0,1fr) 24px minmax(0,1fr);gap:.4rem;margin-top:1.8rem;align-items:stretch}
+@media(max-width:900px){.io{grid-template-columns:1fr}.ioa{transform:rotate(90deg)}}
+.iob{background:var(--diag-bg);border:1px solid #f4d2bf;border-radius:14px;padding:.9rem 1rem;font-size:.9rem;color:var(--ink2);min-width:0}
+.ioh{font-family:var(--disp);font-weight:700;color:var(--diag);font-size:1.05rem;margin-bottom:.35rem}
+.iob ul{margin:0;padding-left:1.1rem}.iob p{margin:0 0 .5rem}.iob small{display:block;margin-top:.4rem;color:var(--mute);font-size:.8rem}
+.iob code{font-family:var(--mono);font-size:.8rem;background:#141a26;color:#ffb38a;border-radius:6px;padding:.25rem .5rem;display:inline-block;max-width:100%;overflow-x:auto}
+.ioa{display:grid;place-items:center;color:var(--diag);font-size:1.4rem;font-weight:700}
+.acts{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.6rem}
+.acts span{font-family:var(--mono);font-size:.78rem;font-weight:600;border-radius:999px;padding:.2rem .6rem;color:#fff}
+.acts .k{background:#6a7385}.acts .r{background:var(--diag)}.acts .e{background:#c0393e}
+.glabel{font-family:var(--mono);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--diag);font-weight:600}
+.tl{display:grid;gap:.6rem;margin-top:.6rem}
+.tl>div{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.75rem .9rem .75rem 3rem;font-size:.88rem;color:var(--ink2)}
+.tl b{font-family:var(--disp);color:var(--ink);font-size:1rem}
+.tl em{font-style:normal;font-family:var(--mono);font-size:.76rem;color:var(--diag);margin-left:.5rem}
+.tl p{margin:.2rem 0 0;line-height:1.4}
+.tn{position:absolute;left:.85rem;top:.8rem;width:24px;height:24px;border-radius:50%;background:var(--diag);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.8rem}
+/* scene chart */
+.sc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:.4rem}
+.scb{display:flex;align-items:flex-end;gap:6px;height:200px;border-bottom:1px solid var(--line)}
+.vb{flex:1;height:var(--h);background:var(--c);border-radius:6px 6px 2px 2px;position:relative;min-width:0}
+.vb b{position:absolute;bottom:100%;left:0;right:0;text-align:center;font-family:var(--mono);font-size:.76rem;margin-bottom:3px}
+.scl{text-align:center;font-size:.8rem;color:var(--mute);margin-top:.4rem}
+.scl span{display:block;font-family:var(--disp);font-weight:700;font-size:1.15rem;color:var(--com)}
+/* qualitative */
+.qual{display:grid;gap:1.6rem;margin-top:1.8rem}
+.qc{margin:.6rem 0 0;font-size:.95rem;color:var(--ink2)}
+.qc span{font-family:var(--mono);font-weight:600;color:var(--com);margin-left:.4rem;white-space:nowrap}
+/* detector figure v3 */
+.dfig{margin-top:1.8rem;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px}
+.dscroll{overflow-x:auto}
+.dfig svg{width:100%;min-width:720px;height:auto;display:block;font-family:var(--body)}
+.dfig .t1{font:600 14px var(--disp);fill:#0e1726}
+.dfig .t3{font:12px var(--mono);fill:#3c4658}
+.ins3.c4{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:1.2rem}
+@media(max-width:1000px){.ins3.c4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.ins3.c4{grid-template-columns:1fr}}
+.c4 .ic h3{margin-top:0}
+.c4 .mr{grid-template-columns:5.4em minmax(0,1fr) 4.6em;font-size:.76rem}.c4 .mr em{white-space:nowrap}
+.mt2{display:grid;gap:2px}
+.mt2 i{display:block;height:7px;width:var(--w);background:var(--c);border-radius:3px}
+.mt.rng{position:relative}
+.mt.rng b{position:absolute;top:0;bottom:0;left:var(--a);width:var(--w2);background:repeating-linear-gradient(45deg,#b9c2d3 0 4px,transparent 4px 7px);border-radius:0 4px 4px 0}
+/* clean layout */
+.center{text-align:center}.center .eyebrow{justify-content:center}.center h2,.center .lead{margin-inline:auto}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2.5rem;align-items:center}
+@media(max-width:900px){.duo{grid-template-columns:1fr}}
+.cfig{max-width:900px;margin:2.2rem auto 0;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 18px 8px}
+section.tint .cfig{background:var(--paper)}
+.cfig svg{width:100%;height:auto;display:block}
+.cfig .lb{font:15px var(--body);fill:#3c4658}.cfig .lb.b{font-weight:700}.cfig .lb.sm{font-size:13px;fill:#6a7385}
+.pills{max-width:900px;margin:1.2rem auto 0;display:grid;gap:.5rem}
+.pills div{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+.pills b{font-family:var(--disp);font-size:.95rem;margin-right:.3rem;min-width:15.5rem}
+.pills span{font-size:.85rem;padding:.2rem .65rem;border-radius:999px;background:var(--det-bg);color:#1d4fb0;border:1px solid #c9d9f8}
+@media(max-width:560px){.pills b{min-width:0;width:100%}}
+.big3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;max-width:980px;margin:2.4rem auto 0}
+@media(max-width:760px){.big3{grid-template-columns:1fr}}
+.big3>div{text-align:center;padding:.4rem .6rem;min-width:0}
+.big3 .n{font-family:var(--disp);font-weight:700;font-size:clamp(2.2rem,4.5vw,3.1rem);line-height:1;letter-spacing:-.02em}
+.big3 .l{margin-top:.5rem;font-weight:600;font-size:1rem;line-height:1.35}
+.big3 small{display:block;font-weight:400;color:var(--mute);font-size:.86rem;margin-top:.2rem}
+.take{max-width:720px;margin:2rem auto 0;text-align:center;color:var(--ink2);font-size:1.02rem}
+/* method blocks */
+.sig2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;max-width:980px;margin:2.2rem auto 0}
+@media(max-width:820px){.sig2{grid-template-columns:1fr}}
+.sg{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.2rem;min-width:0}
+section.tint .sg{background:var(--paper)}
+.sgh{display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap;font-family:var(--disp);font-weight:700;font-size:1.15rem;margin-bottom:.7rem}
+.sgh span{display:inline-grid;place-items:center;min-width:34px;height:28px;border-radius:8px;background:var(--det);color:#fff;font-size:.95rem}
+.sg:nth-child(2) .sgh span{background:#8b6fd1}
+.sgh em{font-style:normal;font-family:var(--body);font-weight:400;font-size:.92rem;color:var(--mute)}
+.sg dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.45rem .9rem;font-size:.92rem}
+.sg dt{font-weight:600;color:var(--ink)}.sg dd{margin:0;color:var(--ink2)}
+@media(max-width:480px){.sg dl{grid-template-columns:1fr;gap:.1rem}.sg dd{margin-bottom:.4rem}}
+.sgf{margin:.8rem 0 0;font-size:.82rem;color:var(--mute);font-style:italic}
+.seq{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr) 22px minmax(0,1fr) 22px minmax(0,1fr);gap:.35rem;max-width:980px;margin:1rem auto 0;align-items:stretch}
+@media(max-width:820px){.seq{grid-template-columns:1fr}.seq i{transform:rotate(90deg)}}
+.seq>div{background:var(--det-bg);border:1px solid #c9d9f8;border-radius:12px;padding:.75rem .85rem;font-size:.88rem;color:var(--ink2);line-height:1.35;min-width:0}
+.seq>div.go{font:inherit;font-size:.88rem;background:var(--det);border-color:var(--det);color:#dbe6fb}.seq>div.go b{color:#fff}
+.seq span{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--det);color:#fff;font-size:.72rem;font-weight:700;margin-right:.4rem;vertical-align:1px}
+.seq .go span{background:#fff;color:var(--det)}
+.seq b{font-family:var(--disp);color:var(--ink);font-size:1rem;margin-right:.35rem}
+.seq i{display:grid;place-items:center;font-style:normal;color:var(--det);font-weight:700}
+.pres{max-width:980px;margin:1rem auto 0;font-size:.92rem;color:var(--ink2);background:#e7f6f8;border:1px solid #bfe6ec;border-radius:12px;padding:.7rem 1rem}
+.pres b{color:#21808e}
+.io3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;max-width:980px;margin:2rem auto 0}
+.io3.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:820px){.io3,.io3.two{grid-template-columns:1fr}}
+.io3>div{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--diag);border-radius:14px;padding:.9rem 1rem;font-size:.92rem;color:var(--ink2);line-height:1.45;min-width:0}
+section.tint .io3>div{background:var(--paper)}
+#commit .io3>div{border-top-color:var(--com)}
+.io3 b{display:block;font-family:var(--disp);font-size:1.08rem;color:var(--ink);margin-bottom:.25rem}
+.a{display:inline-block;font-family:var(--mono);font-size:.76rem;font-weight:600;color:#fff;border-radius:999px;padding:.08rem .5rem;margin-top:.2rem}
+.a.k{background:#6a7385}.a.r{background:var(--diag)}.a.e{background:#c0393e}
+.train{max-width:980px;margin:1rem auto 0}
+.th3{font-family:var(--mono);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--diag);font-weight:600;margin-bottom:.5rem}
+.tr3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+@media(max-width:820px){.tr3{grid-template-columns:1fr}}
+.tr3>div{position:relative;background:var(--diag-bg);border:1px solid #f4d2bf;border-radius:12px;padding:.75rem .9rem .8rem 2.7rem;font-size:.88rem;color:var(--ink2);line-height:1.4;min-width:0}
+.tr3 span{position:absolute;left:.8rem;top:.8rem;width:22px;height:22px;border-radius:50%;background:var(--diag);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.75rem}
+.tr3 b{display:block;font-family:var(--disp);color:var(--ink);font-size:1rem}
+.tr3 em{display:block;font-style:normal;font-family:var(--mono);font-size:.74rem;color:var(--diag);margin:.1rem 0 .25rem}
+.mini3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem;max-width:980px;margin:1.6rem auto 0}
+@media(max-width:760px){.mini3{grid-template-columns:1fr}}
+.mini3>div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.8rem .95rem;font-size:.88rem;line-height:1.4;color:var(--ink2);min-width:0}
+section.tint .mini3>div{background:var(--paper)}
+.mini3 b{display:block;font-family:var(--disp);font-size:1.35rem;color:var(--ink);margin-bottom:.15rem}
+#detect .mini3 b{color:var(--det)}#diagnose .mini3 b{color:var(--diag)}
+.duo2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;max-width:1060px;margin:2rem auto 0;align-items:center}
+@media(max-width:860px){.duo2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="wrap">
+  <a class="logo" href="#top"><i></i>VIGIL</a>
+  <a class="nl" href="#why">Problem</a><a class="nl" href="#idea">Method</a><a class="nl" href="#detect">Detect</a><a class="nl" href="#diagnose">Diagnose</a><a class="nl" href="#commit">Commit</a><a class="nl" href="#results">Results</a><a class="nl" href="#videos">Examples</a><a class="nl" href="#cite">Cite</a>
+</div></nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="herogrid">
+      <div>
+        <span class="kicker"><b>●</b> self-correcting video object segmentation</span>
+        <div class="word">VIGIL<span>.</span></div>
+        <h1 class="title">Evidence-Driven Failure Diagnosis and Recovery for Video Object Segmentation</h1>
+        <p class="sub"><b>VIGIL lets a tracker notice its own failures, look closer, and fix them only when it is sure.</b></p>
+        <div class="authors"><a href="https://valaybundele.github.io/">Valay Bundele</a>, Susmit Agrawal, <a href="https://graphics.cs.uni-tuebingen.de/team/person?name=Mehran%20Hosseinzadeh">Mehran Hosseinzadeh</a>, <a href="https://graphics.cs.uni-tuebingen.de/team/head">Hendrik P. A. Lensch</a></div>
+        <div class="affil">University of Tübingen, Germany</div>
+        <div class="btns">
+          <a class="btn dark" href="https://valaybundele.github.io/assets/Bundele_VIGIL_2026.pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>Paper</a>
+          <a class="btn" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.2-3.1-.1-.4-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.1 0 4.7-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>Code</a>
+          <a class="btn" href="#videos"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Videos</a>
+        </div>
+      </div>
+      <div class="trace" aria-label="Animated sketch: failure evidence accumulates, crosses the threshold, the VLM inspects with zoom, and the correction is committed">
+        <div class="lbl"><span>failure evidence of SAM 3, frame by frame</span><span>sketch</span></div>
+        <svg viewBox="0 0 460 190" role="img">
+          <rect x="0" y="10" width="460" height="150" rx="8" fill="#fbfaf7"/>
+          <rect x="150" y="10" width="140" height="150" fill="#e5484d" opacity=".08"/>
+          <text x="156" y="26" font-family="JetBrains Mono" font-size="10" fill="#c0393e">tracking the wrong object</text>
+          <line x1="0" y1="62" x2="460" y2="62" stroke="#0e1726" stroke-dasharray="5 5" opacity=".45"/>
+          <text x="455" y="56" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#3c4658">confirm</text>
+          <path id="evpath" d="M0 150 L40 148 L80 146 L120 147 L150 140 L170 125 L190 110 L210 92 L230 75 L243 62 L246 150 L280 149 L320 147 L360 145 L400 148 L460 146" fill="none" stroke="#8b6fd1" stroke-width="3" stroke-linejoin="round"/>
+          <g class="mk call"><circle cx="243" cy="62" r="7" fill="#2f6fe4"/><text x="243" y="178" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#2f6fe4">inspect</text><line x1="243" y1="70" x2="243" y2="166" stroke="#2f6fe4" stroke-width="1" opacity=".5"/></g>
+          <g class="mk zoom"><rect x="258" y="78" width="46" height="34" rx="4" fill="none" stroke="#e2723a" stroke-width="2" stroke-dasharray="4 3"/><text x="281" y="125" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#e2723a">zoom</text></g>
+          <g class="mk fix"><path d="M312 40 l8 13 l-16 0z" fill="#1c9a6a"/><line x1="312" y1="53" x2="312" y2="160" stroke="#1c9a6a" stroke-width="3"/><text x="320" y="38" font-family="JetBrains Mono" font-size="10" fill="#1c9a6a">p = 0.97 → commit</text></g>
+        </svg>
+        <div class="steps">
+          <div class="s-det"><b>When to inspect?</b>Evidence builds up over time.</div>
+          <div class="s-diag"><b>What is wrong?</b>A VLM zooms in and proposes a fix.</div>
+          <div class="s-com"><b>Whether to commit?</b>Only confident fixes are applied.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="player rv">
+      <video controls autoplay muted loop playsinline preload="metadata" poster="static/videos/secvos_ghayJozH0iA_obj0.jpg"><source src="static/videos/secvos_ghayJozH0iA_obj0.mp4" type="video/mp4"></video>
+      <div class="cap"><span><b>SeCVOS.</b> SAM 3 switches to a look-alike; VIGIL zooms in and re-seeds it (p = 0.97).</span>
+        <span class="key"><span style="--c:#2f6fe4">ours (IoU)</span><span style="--c:#e5484d">SAM 3 (IoU)</span><span style="--c:#8b6fd1">failure evidence</span><span style="--c:#1c9a6a">correction</span></span></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat rv"><div class="n" style="color:var(--com)">4 / 4</div><div class="t">VOS benchmarks improved over SAM 3</div><div class="d">+7.8 J&amp;F on SeCVOS after two or more scene changes</div></div>
+      <div class="stat rv"><div class="n" style="color:var(--det)">86%</div><div class="t">of persistent failures detected on SA-V</div><div class="d">with half of Dual-Agent's inspections</div></div>
+      <div class="stat rv"><div class="n" style="color:var(--com)">3.3×</div><div class="t">faster than Dual-Agent</div><div class="d">a single 4B VLM, fits a 24 GB GPU</div></div>
+      <div class="stat rv"><div class="n" style="color:var(--diag)">+15.4</div><div class="t">J&amp;F on SAM 2.1, no adaptation</div><div class="d">SeCVOS 58.2 → 73.6, now above SeC alone</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="tint" id="why">
+  <div class="wrap">
+    <div class="duo">
+      <div class="rv">
+        <div class="eyebrow"><span class="num">01</span>The problem</div>
+        <h2>A wrong fix is worse than no fix</h2>
+        <p class="lead">Every correction is written into the tracker's memory. Correcting blindly can make a strong tracker worse.</p>
+      </div>
+      <div class="panel rv">
+        <h4>Change in J&amp;F over SAM 3</h4>
+        <div class="dv">
+          <div class="dvr"><div class="dvl">SA-V</div><div class="dvt">
+            <div class="dvb" style="--w:22.5%;--c:#e9a3a5"><i class="neg"></i><em class="neg">−2.7</em></div>
+            <div class="dvb" style="--w:10%;--c:var(--com)"><i></i><em>+1.2</em></div></div></div>
+          <div class="dvr"><div class="dvl">LVOS v2</div><div class="dvt">
+            <div class="dvb" style="--w:10%;--c:#b9c2d3"><i></i><em>+1.2</em></div>
+            <div class="dvb" style="--w:13.3%;--c:var(--com)"><i></i><em>+1.6</em></div></div></div>
+          <div class="dvr"><div class="dvl">SeCVOS</div><div class="dvt">
+            <div class="dvb" style="--w:22.5%;--c:#b9c2d3"><i></i><em>+2.7</em></div>
+            <div class="dvb" style="--w:44.2%;--c:var(--com)"><i></i><em>+5.3</em></div></div></div>
+          <div class="dvr"><div class="dvl">Cut-VOS</div><div class="dvt">
+            <div class="dvb" style="--w:1.7%;--c:#e9a3a5"><i class="neg"></i><em class="neg">−0.2</em></div>
+            <div class="dvb" style="--w:24.2%;--c:var(--com)"><i></i><em>+2.9</em></div></div></div>
+        </div>
+        <div class="legend"><span style="--c:#b9c2d3">Dual-Agent</span><span style="--c:var(--com)">VIGIL</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="idea">
+  <div class="wrap">
+    <div class="rv center">
+      <div class="eyebrow"><span class="num">02</span>How VIGIL works</div>
+      <h2>Three decisions, each made from evidence</h2>
+      <p class="lead">SAM 3 stays frozen. VIGIL only watches it and, when sure, re-prompts it.</p>
+    </div>
+    <div class="steps3 rv">
+      <a class="st det" href="#detect"><span class="sn">1 · Detect</span><h3>When to inspect?</h3><p>Watch SAM 3's own signals over time.</p></a>
+      <div class="sa">→</div>
+      <a class="st diag" href="#diagnose"><span class="sn">2 · Diagnose</span><h3>What is wrong?</h3><p>One VLM zooms in and proposes a fix.</p></a>
+      <div class="sa">→</div>
+      <a class="st com" href="#commit"><span class="sn">3 · Commit</span><h3>Apply it?</h3><p>Only if the VLM is confident.</p></a>
+    </div>
+    <div class="fig rv"><img src="static/img/fig_pipeline.jpg" alt="VIGIL pipeline: detector calls the corrector, the corrector zooms in, the gate re-seeds SAM 3" loading="lazy"></div>
+  </div>
+</section>
+
+<section class="tint" id="detect">
+  <div class="wrap">
+    <div class="rv center">
+      <div class="eyebrow"><span class="num" style="background:var(--det)">03</span>When to inspect</div>
+      <h2>Inspect when evidence builds up, not when confidence drops</h2>
+      <p class="lead">A wrong track can stay confident, and a correct one can look uncertain. VIGIL watches two kinds of evidence and calls the VLM only when they build up. Training-free; adds 18 ms per frame.</p>
+    </div>
+    <div class="sig2 rv">
+      <div class="sg"><div class="sgh"><span>s₁</span>Propagation state<em>Is tracking healthy?</em></div>
+        <dl><dt>Mask confidence</dt><dd>SAM 3's own IoU estimate</dd>
+        <dt>Presence</dt><dd>is the object in view?</dd>
+        <dt>Memory confidence</dt><dd>how reliable are the remembered frames?</dd>
+        <dt>Identity continuity</dt><dd>does the masked region still look like the object at the start?</dd></dl></div>
+      <div class="sg"><div class="sgh"><span>s₂</span>Target consistency<em>Is it still the target?</em></div>
+        <dl><dt>Memory check</dt><dd>same mask from the prompted frames alone?</dd>
+        <dt>Backward check</dt><dd>can memory re-find the target in frame 1?</dd>
+        <dt>Hypothesis agreement</dt><dd>do SAM 3's 3 candidate masks agree?</dd></dl>
+        <p class="sgf">memory and backward checks: one extra SAM 3 decoder pass each · reveal errors SAM 3's confidence misses</p></div>
+    </div>
+    <div class="seq rv">
+      <div><span>1</span><b>Open</b>when s₁ rises</div>
+      <i>→</i>
+      <div><span>2</span><b>Accumulate</b>max(s₁, s₂) − κ per frame</div>
+      <i>→</i>
+      <div><span>3</span><b>Confirm</b>evidence ≥ H and mask area jumps</div>
+      <i>→</i>
+      <div class="go"><span>4</span><b>Call the VLM</b>if s₁ is still high</div>
+    </div>
+    <div class="cfig rv">
+      <svg viewBox="0 0 900 250" role="img" aria-label="Failure evidence over time: a brief drop stays below the threshold and is ignored; a persistent failure crosses it, the VLM is called, the fix is applied and evidence resets">
+        <rect x="430" y="10" width="200" height="200" rx="6" fill="#e5484d" opacity=".08"/>
+        <text x="530" y="32" text-anchor="middle" class="lb" fill="#c0393e">SAM 3 follows the wrong object</text>
+        <line x1="20" y1="90" x2="880" y2="90" stroke="#0e1726" stroke-dasharray="6 6" opacity=".4"/>
+        <text x="880" y="80" text-anchor="end" class="lb">threshold</text>
+        <path d="M20 200 L150 198 L185 160 L205 158 L230 198 L430 198 L470 170 L510 135 L550 102 L572 86 L576 200 L880 198" fill="none" stroke="#2f6fe4" stroke-width="3.5" stroke-linejoin="round"/>
+        <text x="205" y="145" text-anchor="middle" class="lb">brief drop: ignored</text>
+        <circle cx="574" cy="86" r="9" fill="#2f6fe4"/>
+        <text x="592" y="72" class="lb b" fill="#2f6fe4">call the VLM</text>
+        <path d="M600 120 l9 15 l-18 0z" fill="#1c9a6a"/><line x1="600" y1="135" x2="600" y2="200" stroke="#1c9a6a" stroke-width="3.5"/>
+        <text x="620" y="140" class="lb b" fill="#1c9a6a">fixed</text>
+        <text x="20" y="236" class="lb sm">accumulated failure evidence over time →</text>
+      </svg>
+    </div>
+    <div class="pres rv"><b>+ Presence channel:</b> no mask, but objectness says the object is there → call the VLM.</div>
+    <div class="big3">
+      <div class="rv"><div class="n" style="color:var(--det)">1.4–2.0×</div><div class="l">the precision of random inspection<small>on SA-V, LVOS and SeCVOS; on SA-V it finds 86% of persistent failures with half of Dual-Agent's inspections</small></div></div>
+      <div class="rv"><div class="n" style="color:var(--det)">65–84%</div><div class="l">of persistent failures caught within 1 s<small>21–34% more than random inspection, typically one or two frames after onset</small></div></div>
+      <div class="rv"><div class="n" style="color:var(--det)">50–60%</div><div class="l">of updates land on failures in closed loop<small>random inspection: 12–22%, with the same oracle corrector</small></div></div>
+    </div>
+    <div class="mini3">
+      <div class="rv"><b>1.7–2.7×</b>as many inspections needed by a threshold on SAM 3's confidence to find the same failures: SAM 3 often follows the wrong object confidently</div>
+      <div class="rv"><b>13–29%</b>higher precision than random on SAM 2.1 and SeC, without refitting. SeC's own confidence is a weak signal (AUROC 0.75), but the memory check stays strong (0.84)</div>
+      <div class="rv"><b>58–83%</b>of the failures found by the presence channel are missed by the mask-based inspections; it adds 19–27 points of recall</div>
+    </div>
+  </div>
+</section>
+
+<section id="diagnose">
+  <div class="wrap">
+    <div class="rv center">
+      <div class="eyebrow"><span class="num" style="background:var(--diag)">04</span>What is wrong</div>
+      <h2>Look closer before answering</h2>
+      <p class="lead">One Qwen3.5-4B VLM judges and fixes in a single answer.</p>
+    </div>
+    <div class="io3 rv">
+      <div><b>Sees</b>the exemplar, the query frame, and context at three time scales. SAM 3's mask only as outlines.</div>
+      <div><b>Zooms</b>1–2 full-resolution crops, up to 6×.</div>
+      <div><b>Answers</b>verdict · visibility · box<br>correct → <span class="a k">keep</span> · wrong, visible → <span class="a r">re-seed</span> · wrong, absent → <span class="a e">erase</span></div>
+    </div>
+    <div class="train rv">
+      <div class="th3">Trained in three stages</div>
+      <div class="tr3">
+        <div><span>1</span><b>Identity-aware SFT</b><em>90k examples</em>5 tracking states, identity contrasts; a VLM judge drops the 26% whose answer cannot be seen</div>
+        <div><span>2</span><b>Zoom cold start</b><em>7.6k dialogues</em>learns to crop; bad crops get zero loss</div>
+        <div><span>3</span><b>GRPO</b><em>2.4k queries</em>learns where to zoom from its own dialogues</div>
+      </div>
+    </div>
+    <div class="fig rv" style="max-width:980px;margin-inline:auto"><img src="static/img/crop_dialogue_v2.jpg" alt="The VLM zooms on SAM 3's mask, then on the target, then re-seeds SAM 3" loading="lazy"></div>
+    <p class="figcap">Target: 0.3% of the frame. Zoom 1: SAM 3 is on a child. Zoom 2: the target, as in the exemplar. Answer: re-seed.</p>
+    <div class="big3">
+      <div class="rv"><div class="n" style="color:var(--diag)">+11.6</div><div class="l">points on the hardest identity test<small>it follows the exemplar, not position (46.8 → 58.4%)</small></div></div>
+      <div class="rv"><div class="n" style="color:var(--diag)">39 / 45</div><div class="l">re-detections from a crop help<small>on LVOS and SA-V</small></div></div>
+      <div class="rv"><div class="n" style="color:var(--diag)">+0.8</div><div class="l">J&amp;F from zoom on SA-V, after GRPO<small>scripted zoom alone does not help (85.1 → 84.8)</small></div></div>
+    </div>
+    <div class="mini3">
+      <div class="rv"><b>79%</b>of LVOS crops cover at least half of a present target; all 27 erasures on LVOS help or leave J unchanged</div>
+      <div class="rv"><b>0.67 → 0.73</b>help-vs-hurt AUROC of the verdict confidence on SA-V without vs with zoom (LVOS: 0.68 → 0.77): zoom also makes the gate more selective</div>
+      <div class="rv"><b>3.3×</b>faster than Dual-Agent: one 4B model judges and fixes, instead of an 8B verifier and a 4B corrector; fits a 24 GB GPU</div>
+    </div>
+    <div class="fig rv" style="max-width:860px;margin-inline:auto"><img src="static/img/identity_test_examples.jpg" alt="Identity test: the same query frame with either exemplar; with identity contrasts the choice follows the exemplar" loading="lazy"></div>
+    <p class="figcap">Identity test: same frames, two exemplars. With identity contrasts the choice follows the exemplar; without, it often picks the same object for both.</p>
+  </div>
+</section>
+
+<section class="tint" id="commit">
+  <div class="wrap">
+    <div class="rv center">
+      <div class="eyebrow"><span class="num" style="background:var(--com)">05</span>Whether to commit</div>
+      <h2>Knowing when not to correct is what makes correction work</h2>
+      <p class="lead">The same corrector, with and without its confidence gate.</p>
+    </div>
+    <div class="io3 two rv">
+      <div><b>Self-gated</b>p = the VLM's probability of its own <i>wrong</i> verdict. Apply only if p ≥ 0.9, by re-prompting SAM 3.</div>
+      <div><b>Verdict kept out of RL</b>RL rewards only box and visibility; the verdict is supervised directly, so p stays calibrated.</div>
+    </div>
+    <div class="duo2">
+      <div class="panel rv" >
+      <div class="gate">
+        <div class="gcol"><h5>SA-V test</h5>
+          <div class="gbars"><div class="gb" style="--c:#e9a3a5;--h:calc((81.3 - 78) / 9 * 100%)"><b>81.3</b><i></i></div><div class="gb" style="--c:#b9c2d3;--h:calc((84.4 - 78) / 9 * 100%)"><b>84.4</b><i></i></div><div class="gb" style="--c:var(--com);--h:calc((85.6 - 78) / 9 * 100%)"><b>85.6</b><i></i></div></div>
+          <div class="glab"><span>apply all</span><span>SAM 3</span><span>gated</span></div></div>
+        <div class="gcol"><h5>LVOS v2 val</h5>
+          <div class="gbars"><div class="gb" style="--c:#e9a3a5;--h:calc((87.7 - 85) / 5.5 * 100%)"><b>87.7</b><i></i></div><div class="gb" style="--c:#b9c2d3;--h:calc((88.2 - 85) / 5.5 * 100%)"><b>88.2</b><i></i></div><div class="gb" style="--c:var(--com);--h:calc((89.8 - 85) / 5.5 * 100%)"><b>89.8</b><i></i></div></div>
+          <div class="glab"><span>apply all</span><span>SAM 3</span><span>gated</span></div></div>
+      </div>
+      <p class="note">J&amp;F. Gate: apply a fix only if confidence p ≥ 0.9.</p>
+    </div>
+      <div class="rv"><div class="fig" style="margin-top:0"><img src="static/img/fig_gate_help_share.png" alt="Share of helpful fixes rises with verdict confidence" loading="lazy"></div><p class="figcap">The share of helpful fixes rises with confidence. Dashed: the gate.</p></div>
+    </div>
+    <div class="big3">
+      <div class="rv"><div class="n" style="color:var(--com)">≥ 2 : 1</div><div class="l">helpful to harmful fixes above the gate<small>SA-V 2 : 1, LVOS 2.6 : 1</small></div></div>
+      <div class="rv"><div class="n" style="color:var(--com)">0.77 → 0.48</div><div class="l">help-vs-hurt AUROC on LVOS<small>when RL trains on the reward alone, without verdict supervision: chance level</small></div></div>
+      <div class="rv"><div class="n" style="color:var(--com)">0.11 vs 0.41</div><div class="l">calibration error (ECE) on LVOS<small>with vs without verdict supervision; SA-V: 0.05 vs 0.24</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="rv">
+      <div class="eyebrow"><span class="num">06</span>Results</div>
+      <h2>Better on every benchmark, most where tracking is hardest</h2>
+      <p class="lead">The gain grows with every scene change, where a tracker's memory breaks.</p>
+    </div>
+    <div class="split" style="grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)">
+      <div class="panel rv">
+        <h4>SeCVOS J&amp;F by number of scene changes</h4>
+        
+        <div class="sc">
+          <div class="scg"><div class="scb"><div class="vb" style="--h:calc((87.1 - 60) / 30 * 100%);--c:#b9c2d3"><b>87.1</b></div><div class="vb" style="--h:calc((87.4 - 60) / 30 * 100%);--c:var(--com)"><b>87.4</b></div></div><div class="scl">0 changes<span>+0.3</span></div></div>
+          <div class="scg"><div class="scb"><div class="vb" style="--h:calc((74.6 - 60) / 30 * 100%);--c:#b9c2d3"><b>74.6</b></div><div class="vb" style="--h:calc((80.7 - 60) / 30 * 100%);--c:var(--com)"><b>80.7</b></div></div><div class="scl">1 change<span>+6.1</span></div></div>
+          <div class="scg"><div class="scb"><div class="vb" style="--h:calc((69.3 - 60) / 30 * 100%);--c:#b9c2d3"><b>69.3</b></div><div class="vb" style="--h:calc((77.1 - 60) / 30 * 100%);--c:var(--com)"><b>77.1</b></div></div><div class="scl">≥ 2 changes<span>+7.8</span></div></div>
+        </div>
+        <div class="legend"><span style="--c:#b9c2d3">SAM 3</span><span style="--c:var(--com)">VIGIL</span></div>
+        <p class="note">Axis starts at 60.</p>
+      </div>
+      <div class="rv" style="min-width:0">
+        <div class="tabs rv" role="tablist" aria-label="Benchmark">
+      <button class="tab" role="tab" aria-selected="true" data-t="sav">SA-V test</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="lvos">LVOS v2 val</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="secvos">SeCVOS</button>
+      <button class="tab" role="tab" aria-selected="false" data-t="cut">Cut-VOS</button>
+    </div>
+    <div class="tw rv">
+      <table data-p="sav"><thead><tr><th>Method</th><th>J&amp;F</th><th>J</th><th>F</th></tr></thead><tbody>
+        <tr class="grp"><td colspan="4">SAM-based trackers</td></tr>
+        <tr><td>SAM 2.1</td><td>79.6</td><td>76.1</td><td>83.2</td></tr>
+        <tr><td>SAMURAI</td><td>80.0</td><td class="na">–</td><td class="na">–</td></tr>
+        <tr><td>SAM2Long</td><td>81.2</td><td>77.6</td><td>84.9</td></tr>
+        <tr><td>SeC</td><td>81.7</td><td class="na">–</td><td class="na">–</td></tr>
+        <tr><td>SAM 3</td><td>84.4</td><td>80.4</td><td>88.4</td></tr>
+        <tr class="grp"><td colspan="4">Self-correcting trackers</td></tr>
+        <tr><td>Dual-Agent</td><td>81.7</td><td>77.8</td><td>85.7</td></tr>
+        <tr class="ours"><td>VIGIL (ours)</td><td>85.6<span class="up">+1.2</span></td><td>81.5</td><td>89.6</td></tr>
+      </tbody></table>
+      <table data-p="lvos" hidden><thead><tr><th>Method</th><th>J&amp;F</th><th>J</th><th>F</th></tr></thead><tbody>
+        <tr class="grp"><td colspan="4">SAM-based trackers</td></tr>
+        <tr><td>SAM 2.1</td><td>84.1</td><td>80.7</td><td>87.6</td></tr>
+        <tr><td>SAMURAI</td><td>84.2</td><td class="na">–</td><td class="na">–</td></tr>
+        <tr><td>SAM2Long</td><td>85.9</td><td>82.4</td><td>89.6</td></tr>
+        <tr><td>SeC</td><td>86.5</td><td class="na">–</td><td class="na">–</td></tr>
+        <tr><td>SAM 3</td><td>88.2</td><td>84.4</td><td>92.2</td></tr>
+        <tr class="grp"><td colspan="4">Self-correcting trackers</td></tr>
+        <tr><td>Dual-Agent</td><td>89.4</td><td>85.4</td><td>93.4</td></tr>
+        <tr class="ours"><td>VIGIL (ours)</td><td>89.8<span class="up">+1.6</span></td><td>85.7</td><td>93.8</td></tr>
+      </tbody></table>
+      <table data-p="secvos" hidden><thead><tr><th>Method</th><th>0 changes</th><th>1 change</th><th>≥ 2 changes</th><th>Overall</th></tr></thead><tbody>
+        <tr class="grp"><td colspan="5">SAM-based trackers</td></tr>
+        <tr><td>SAM 2.1</td><td>79.4</td><td>58.5</td><td>52.4</td><td>58.2</td></tr>
+        <tr><td>SAMURAI</td><td>81.8</td><td>60.6</td><td>59.3</td><td>62.2</td></tr>
+        <tr><td>SAM2Long</td><td>81.3</td><td>61.8</td><td>58.5</td><td>62.3</td></tr>
+        <tr><td>SeC</td><td>84.2</td><td>69.6</td><td>67.5</td><td>70.0</td></tr>
+        <tr><td>SAM 3</td><td>87.1</td><td>74.6</td><td>69.3</td><td>74.2</td></tr>
+        <tr class="grp"><td colspan="5">Self-correcting trackers</td></tr>
+        <tr><td>Dual-Agent</td><td>88.1</td><td>76.2</td><td>73.4</td><td>76.9</td></tr>
+        <tr class="ours"><td>VIGIL (ours)</td><td>87.4</td><td>80.7</td><td>77.1<span class="up">+7.8</span></td><td>79.5<span class="up">+5.3</span></td></tr>
+      </tbody></table>
+      <table data-p="cut" hidden><thead><tr><th>Method</th><th>J&amp;F</th><th>J</th><th>F</th></tr></thead><tbody>
+        <tr class="grp"><td colspan="4">Trackers</td></tr>
+        <tr><td>SAM 2.1</td><td>59.4</td><td>58.3</td><td>60.6</td></tr>
+        <tr><td>SAAS</td><td>62.0</td><td>60.5</td><td>63.6</td></tr>
+        <tr><td>SAM 3</td><td>72.9</td><td>71.1</td><td>74.8</td></tr>
+        <tr class="grp"><td colspan="4">Self-correcting trackers</td></tr>
+        <tr><td>Dual-Agent</td><td>72.7</td><td>70.8</td><td>74.7</td></tr>
+        <tr class="ours"><td>VIGIL (ours)</td><td>75.8<span class="up">+2.9</span></td><td>73.9</td><td>77.6</td></tr>
+      </tbody></table>
+    </div>
+    <p class="note">Green: gain over SAM 3.</p>
+      </div>
+    </div>
+    <div class="cards3" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+      <div class="panel rv">
+        <h4>A weak tracker with VIGIL beats a strong one alone</h4>
+        <p class="hint">Same detector and corrector, no retraining. SeCVOS J&amp;F.</p>
+        <div class="mb big">
+          <div class="mr"><span>SAM 2.1</span><div class="mt"><i style="--w:calc((58.2 - 50) / 30 * 100%);--c:#b9c2d3"></i></div><em>58.2</em></div>
+          <div class="mr"><span>SeC</span><div class="mt"><i style="--w:calc((70.0 - 50) / 30 * 100%);--c:#b9c2d3"></i></div><em>70.0</em></div>
+          <div class="mr"><span>SAM 2.1 + VIGIL</span><div class="mt"><i style="--w:calc((73.6 - 50) / 30 * 100%);--c:var(--com)"></i></div><em>73.6</em></div>
+          <div class="mr"><span>SeC + VIGIL</span><div class="mt"><i style="--w:calc((76.5 - 50) / 30 * 100%);--c:var(--com)"></i></div><em>76.5</em></div>
+          <div class="mcap">axis from 50</div>
+        </div>
+        <p class="note">No retraining: VIGIL acts only through prompts.</p>
+      </div>
+      <div class="panel rv">
+        <h4>3.3× faster than Dual-Agent, and more accurate</h4>
+        <p class="hint">Seconds per video on SA-V test, one RTX PRO 6000.</p>
+        <div class="mb big">
+          <div class="mr"><span>SAM 3</span><div class="mt"><i style="--w:calc(78.0 / 420 * 100%);--c:#b9c2d3"></i></div><em>78.0</em></div>
+          <div class="mr"><span>Dual-Agent</span><div class="mt"><i style="--w:calc(410.1 / 420 * 100%);--c:#e9a3a5"></i></div><em>410.1</em></div>
+          <div class="mr"><span>VIGIL</span><div class="mt"><i style="--w:calc(122.7 / 420 * 100%);--c:var(--com)"></i></div><em>122.7</em></div>
+        </div>
+        <p class="note">Fits a single 24 GB GPU (18.4 vs 47.1 GiB).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tint" id="videos">
+  <div class="wrap">
+    <div class="rv">
+      <div class="eyebrow"><span class="num">07</span>See it</div>
+      <h2>Where SAM 3 fails, and VIGIL recovers</h2>
+    </div>
+    <div class="qual">
+      <div class="rv"><div class="fig" style="margin-top:0"><img src="static/img/qual_v7_c.jpg" alt="SAM 3 switches to another LEGO figure after a cut; two crops separate target and look-alike; VIGIL re-seeds on the target" loading="lazy"></div>
+        <p class="qc"><b>Look-alike switch.</b> After a cut, SAM 3 follows the other LEGO figure. Two crops tell them apart, and VIGIL re-seeds on the target. <span>J&amp;F 27.2 → 54.4</span></p></div>
+      <div class="rv"><div class="fig" style="margin-top:0"><img src="static/img/qual_v7_d.jpg" alt="An e-scooter covering 0.2% of the frame is lost by SAM 3; a crop resolves it and VIGIL re-detects it" loading="lazy"></div>
+        <p class="qc"><b>A target of 0.2% of the frame.</b> SAM 3 loses the e-scooter; one crop resolves it and VIGIL re-detects it. <span>J&amp;F 50.1 → 87.0</span></p></div>
+    </div>
+    <p class="lead rv" style="margin-top:2.4rem">More videos: the VLM's dialogue on top, the IoU timeline below.</p>
+    <div class="gal rv">
+      <div class="stage">
+        <video id="gv" controls muted loop playsinline preload="metadata"></video>
+        <div class="meta"><h4 id="gt"></h4><p id="gc"></p></div>
+      </div>
+      <div>
+        
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cite">
+  <div class="wrap">
+    <div class="eyebrow"><span class="num">08</span>Cite</div>
+    <h2>BibTeX</h2>
+    <div class="bib"><button class="copy" id="copy" type="button">Copy</button>
+<pre id="bibtxt">@article{bundele2026vigil,
+  title   = {Evidence-Driven Failure Diagnosis and Recovery for Video Object Segmentation},
+  author  = {Bundele, Valay and Agrawal, Susmit and Hosseinzadeh, Mehran and Lensch, Hendrik P. A.},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre></div>
+  </div>
+</section>
+
+<footer><div class="wrap">VIGIL · University of Tübingen · 2026</div></footer>
+
+<script>
+(function(){
+  var V=[
+    ["secvos_FRNZQHmo_Ig_obj3","SeCVOS","Three corrections across scene changes","Two stray masks erased, one switch fixed with a box."],
+    ["secvos_hLZFitoJPe8_obj0","SeCVOS","Stray mask erased, target re-found","Mask on an absent target erased; target re-found on return."],
+    ["secvos_IR6V_6xqWDU_obj0","SeCVOS","Lost target re-found twice","SAM 3 loses the target after cuts; VIGIL re-finds it."],
+    ["lvos_uXO4RUO3_obj1","LVOS","Ghost erased, car re-found on return","Mask on another car erased; target re-found on return."],
+    ["lvos_bxjTooAn_obj4","LVOS","Re-found, then re-prompted with a box","Re-detect, then a box fix."],
+    ["sav_sav_026969_obj0","SA-V","Lost target re-found","Visible target re-detected."],
+    ["sav_sav_011282_obj1","SA-V","Ghost erased, target re-acquired","Stray mask erased; target re-acquired."]
+  ];
+  var gv=document.getElementById('gv'),gt=document.getElementById('gt'),gc=document.getElementById('gc'),box=document.getElementById('thumbs');
+  function show(i,play){var v=V[i];gv.poster='static/videos/'+v[0]+'.jpg';gv.src='static/videos/'+v[0]+'.mp4';gt.innerHTML='<span class="ds">'+v[1]+'</span>'+v[2];gc.textContent=v[3];
+    box.querySelectorAll('.th').forEach(function(b,j){b.setAttribute('aria-current',j===i?'true':'false')}); if(play){var p=gv.play();if(p&&p.catch)p.catch(function(){});}}
+  V.forEach(function(v,i){var b=document.createElement('button');b.className='th';b.type='button';b.dataset.ds=v[1];
+    b.innerHTML='<img loading="lazy" src="static/videos/'+v[0]+'.jpg" alt=""><span><b>'+v[1]+'</b> · '+v[2]+'</span>';b.onclick=function(){show(i,true)};box.appendChild(b)});
+  show(0,false);
+  document.querySelectorAll('[data-t]').forEach(function(t){t.onclick=function(){document.querySelectorAll('[data-t]').forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false')});
+    document.querySelectorAll('table[data-p]').forEach(function(tb){tb.hidden=tb.dataset.p!==t.dataset.t})}});
+  var rv=document.querySelectorAll('.rv');
+  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{rootMargin:'0px 0px -6% 0px'});rv.forEach(function(e){io.observe(e)})}
+  else rv.forEach(function(e){e.classList.add('in')});
+  var c=document.getElementById('copy');c.onclick=function(){var t=document.getElementById('bibtxt').textContent;
+    function sel(){var r=document.createRange();r.selectNodeContents(document.getElementById('bibtxt'));var s=getSelection();s.removeAllRanges();s.addRange(r)}
+    if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){c.textContent='Copied';setTimeout(function(){c.textContent='Copy'},1500)},sel);else sel()};
+})();
+</script>
+</body>
+</html>
