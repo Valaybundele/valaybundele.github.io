@@ -392,6 +392,19 @@ section.tint .mini3>div{background:var(--paper)}
 #detect .mini3 b{color:var(--det)}#diagnose .mini3 b{color:var(--diag)}
 .duo2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;max-width:1060px;margin:2rem auto 0;align-items:center}
 @media(max-width:860px){.duo2{grid-template-columns:1fr}}
+.res3{max-width:1040px;margin-inline:auto}
+.pc h4{font-size:1.02rem;line-height:1.3}
+.pr .mr{grid-template-columns:6.4em minmax(0,1fr) auto;font-size:.8rem}
+.pr .mr em{white-space:nowrap;font-weight:400;color:var(--mute)} .pr .mr em b{color:var(--ink);font-weight:600}
+.pr .mt2{position:relative;gap:3px} .pr .mt2 i{height:9px}
+.pr .mt2 .ch{position:absolute;top:-3px;bottom:-3px;left:var(--x);border-left:1.5px dashed var(--ink2);z-index:1}
+.pr .mt{height:12px}
+.lg{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin-top:.7rem;font-size:.76rem;color:var(--mute)}
+.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.35rem;vertical-align:-1px}
+.zg{font-family:var(--mono);font-size:.72rem;letter-spacing:.05em;color:var(--mute);margin-top:.3rem}
+.waf{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;width:100%;max-width:270px;margin:.6rem auto 0}
+.waf i{display:block;height:20px;border-radius:3px;background:#b9c2d3}.waf i.y{background:var(--diag)}
+@media(max-width:900px){.res3{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
@@ -509,12 +522,12 @@ section.tint .mini3>div{background:var(--paper)}
       <p class="lead">A wrong track can stay confident, and a correct one can look uncertain. VIGIL watches two kinds of evidence and calls the VLM only when they build up. Training-free; adds 18 ms per frame.</p>
     </div>
     <div class="sig2 rv">
-      <div class="sg"><div class="sgh"><span>s₁</span>Propagation state<em>Is tracking healthy?</em></div>
+      <div class="zg"><div class="sgh"><span>s₁</span>Propagation state<em>Is tracking healthy?</em></div>
         <dl><dt>Mask confidence</dt><dd>SAM 3's own IoU estimate</dd>
         <dt>Presence</dt><dd>is the object in view?</dd>
         <dt>Memory confidence</dt><dd>how reliable are the remembered frames?</dd>
         <dt>Identity continuity</dt><dd>does the masked region still look like the object at the start?</dd></dl></div>
-      <div class="sg"><div class="sgh"><span>s₂</span>Target consistency<em>Is it still the target?</em></div>
+      <div class="zg"><div class="sgh"><span>s₂</span>Target consistency<em>Is it still the target?</em></div>
         <dl><dt>Memory check</dt><dd>same mask from the prompted frames alone?</dd>
         <dt>Backward check</dt><dd>can memory re-find the target in frame 1?</dd>
         <dt>Hypothesis agreement</dt><dd>do SAM 3's 3 candidate masks agree?</dd></dl>
@@ -545,16 +558,23 @@ section.tint .mini3>div{background:var(--paper)}
       </svg>
     </div>
     <div class="pres rv"><b>+ Presence channel:</b> no mask, but objectness says the object is there → call the VLM.</div>
-    <div class="big3">
-      <div class="rv"><div class="n" style="color:var(--det)">1.4–2.0×</div><div class="l">the precision of random inspection<small>on SA-V, LVOS and SeCVOS; on SA-V it finds 86% of persistent failures with half of Dual-Agent's inspections</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--det)">65–84%</div><div class="l">of persistent failures caught within 1 s<small>21–34% more than random inspection, typically one or two frames after onset</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--det)">50–60%</div><div class="l">of updates land on failures in closed loop<small>random inspection: 12–22%, with the same oracle corrector</small></div></div>
-    </div>
-    <div class="mini3">
-      <div class="rv"><b>1.7–2.7×</b>as many inspections needed by a threshold on SAM 3's confidence to find the same failures: SAM 3 often follows the wrong object confidently</div>
-      <div class="rv"><b>13–29%</b>higher precision than random on SAM 2.1 and SeC, without refitting. SeC's own confidence is a weak signal (AUROC 0.75), but the memory check stays strong (0.84)</div>
-      <div class="rv"><b>58–83%</b>of the failures found by the presence channel are missed by the mask-based inspections; it adds 19–27 points of recall</div>
-    </div>
+    <div class="cards3 res3">
+<div class="panel pc rv"><h4>1.4–2.0× the precision of random inspection</h4><p class="hint">Inspections that land on a failure (%).</p><div class="mb pr">
+<div class="mr"><span>SA-V</span><div class="mt2"><i style="--w:44.0%;--c:var(--det)"></i><i style="--w:25.0%;--c:#b9c2d3"></i></div><em><b>44</b> / 25</em></div>
+<div class="mr"><span>LVOS</span><div class="mt2"><i style="--w:58.0%;--c:var(--det)"></i><i style="--w:29.0%;--c:#b9c2d3"></i></div><em><b>58</b> / 29</em></div>
+<div class="mr"><span>SeCVOS</span><div class="mt2"><i style="--w:34.0%;--c:var(--det)"></i><i style="--w:25.0%;--c:#b9c2d3"></i></div><em><b>34</b> / 25</em></div><div class="lg"><span><i style="background:var(--det)"></i>VIGIL detector</span><span><i style="background:#b9c2d3"></i>random, same count</span></div>
+</div></div>
+<div class="panel pc rv"><h4>Most persistent failures caught within 1 s</h4><p class="hint">Recall within 1 s of failure onset (%).</p><div class="mb pr">
+<div class="mr"><span>SA-V</span><div class="mt2"><i style="--w:84.5%;--c:var(--det)"></i><i style="--w:57.2%;--c:#b9c2d3"></i></div><em><b>84.5</b> / 57.2</em></div>
+<div class="mr"><span>LVOS</span><div class="mt2"><i style="--w:67.5%;--c:var(--det)"></i><i style="--w:33.7%;--c:#b9c2d3"></i></div><em><b>67.5</b> / 33.7</em></div>
+<div class="mr"><span>SeCVOS</span><div class="mt2"><i style="--w:65.0%;--c:var(--det)"></i><i style="--w:44.1%;--c:#b9c2d3"></i></div><em><b>65.0</b> / 44.1</em></div><div class="lg"><span><i style="background:var(--det)"></i>VIGIL detector</span><span><i style="background:#b9c2d3"></i>random, same count</span></div>
+</div></div>
+<div class="panel pc rv"><h4>Still precise when corrections change the memory</h4><p class="hint">Closed loop, oracle corrector: updates on failures (%).</p><div class="mb pr">
+<div class="mr"><span>SA-V</span><div class="mt2"><i style="--w:50.0%;--c:var(--det)"></i><i style="--w:22.0%;--c:#b9c2d3"></i></div><em><b>50</b> / 22</em></div>
+<div class="mr"><span>LVOS</span><div class="mt2"><i style="--w:53.0%;--c:var(--det)"></i><i style="--w:12.0%;--c:#b9c2d3"></i></div><em><b>53</b> / 12</em></div>
+<div class="mr"><span>SeCVOS</span><div class="mt2"><i style="--w:60.0%;--c:var(--det)"></i><i style="--w:16.0%;--c:#b9c2d3"></i></div><em><b>60</b> / 16</em></div><div class="lg"><span><i style="background:var(--det)"></i>VIGIL detector</span><span><i style="background:#b9c2d3"></i>random, same count</span></div>
+</div></div>
+</div>
   </div>
 </section>
 
@@ -580,16 +600,24 @@ section.tint .mini3>div{background:var(--paper)}
     </div>
     <div class="fig rv" style="max-width:980px;margin-inline:auto"><img src="static/img/crop_dialogue_v2.jpg" alt="The VLM zooms on SAM 3's mask, then on the target, then re-seeds SAM 3" loading="lazy"></div>
     <p class="figcap">Target: 0.3% of the frame. Zoom 1: SAM 3 is on a child. Zoom 2: the target, as in the exemplar. Answer: re-seed.</p>
-    <div class="big3">
-      <div class="rv"><div class="n" style="color:var(--diag)">+11.6</div><div class="l">points on the hardest identity test<small>it follows the exemplar, not position (46.8 → 58.4%)</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--diag)">39 / 45</div><div class="l">re-detections from a crop help<small>on LVOS and SA-V</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--diag)">+0.8</div><div class="l">J&amp;F from zoom on SA-V, after GRPO<small>scripted zoom alone does not help (85.1 → 84.8)</small></div></div>
-    </div>
-    <div class="mini3">
-      <div class="rv"><b>79%</b>of LVOS crops cover at least half of a present target; all 27 erasures on LVOS help or leave J unchanged</div>
-      <div class="rv"><b>0.67 → 0.73</b>help-vs-hurt AUROC of the verdict confidence on SA-V without vs with zoom (LVOS: 0.68 → 0.77): zoom also makes the gate more selective</div>
-      <div class="rv"><b>3.3×</b>faster than Dual-Agent: one 4B model judges and fixes, instead of an 8B verifier and a 4B corrector; fits a 24 GB GPU</div>
-    </div>
+    <div class="cards3 res3">
+<div class="panel pc rv"><h4>Identity contrasts teach recognition by appearance</h4><p class="hint">Identity test passed (%), with vs without contrasts.</p><div class="mb pr">
+<div class="mr"><span>All tests</span><div class="mt2"><i style="--w:74.6%;--c:var(--diag)"></i><i style="--w:68.1%;--c:#b9c2d3"></i></div><em><b>74.6</b> / 68.1</em></div>
+<div class="mr"><span>Same kind</span><div class="mt2"><i style="--w:63.1%;--c:var(--diag)"></i><i style="--w:55.7%;--c:#b9c2d3"></i></div><em><b>63.1</b> / 55.7</em></div>
+<div class="mr"><span>Pos./size mislead</span><div class="mt2"><i style="--w:69.0%;--c:var(--diag)"></i><i style="--w:58.5%;--c:#b9c2d3"></i></div><em><b>69.0</b> / 58.5</em></div>
+<div class="mr"><span>Both (hardest)</span><div class="mt2"><i style="--w:58.4%;--c:var(--diag)"></i><i style="--w:46.8%;--c:#b9c2d3"></i></div><em><b>58.4</b> / 46.8</em></div><div class="lg"><span><i style="background:var(--diag)"></i>with contrasts</span><span><i style="background:#b9c2d3"></i>without</span></div>
+</div></div>
+<div class="panel pc rv"><h4>Zoom pays off after GRPO</h4><p class="hint">J&amp;F of the gated corrector after each training stage.</p><div class="mb pr">
+<div class="zg">SA-V</div><div class="mr"><span>Base</span><div class="mt"><i style="--w:51.0%;--c:#b9c2d3"></i></div><em>85.1</em></div>
+<div class="mr"><span>+ Zoom SFT</span><div class="mt"><i style="--w:48.0%;--c:#f0b48f"></i></div><em>84.8</em></div>
+<div class="mr"><span>+ GRPO</span><div class="mt"><i style="--w:56.0%;--c:var(--diag)"></i></div><em>85.6</em></div><div class="zg">LVOS</div><div class="mr"><span>Base</span><div class="mt"><i style="--w:93.0%;--c:#b9c2d3"></i></div><em>89.3</em></div>
+<div class="mr"><span>+ Zoom SFT</span><div class="mt"><i style="--w:87.0%;--c:#f0b48f"></i></div><em>88.7</em></div>
+<div class="mr"><span>+ GRPO</span><div class="mt"><i style="--w:98.0%;--c:var(--diag)"></i></div><em>89.8</em></div><div class="mcap">axis from 80</div>
+</div></div>
+<div class="panel pc rv"><h4>Re-detections from a crop are reliable</h4><p class="hint">39 of 45 re-detections from a crop help (LVOS and SA-V).</p><div class="mb pr">
+<div class="waf"><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="lg"><span><i style="background:var(--diag)"></i>helps</span><span><i style="background:#b9c2d3"></i>does not help</span></div>
+</div></div>
+</div>
     <div class="fig rv" style="max-width:860px;margin-inline:auto"><img src="static/img/identity_test_examples.jpg" alt="Identity test: the same query frame with either exemplar; with identity contrasts the choice follows the exemplar" loading="lazy"></div>
     <p class="figcap">Identity test: same frames, two exemplars. With identity contrasts the choice follows the exemplar; without, it often picks the same object for both.</p>
   </div>
@@ -620,11 +648,16 @@ section.tint .mini3>div{background:var(--paper)}
     </div>
       <div class="rv"><div class="fig" style="margin-top:0"><img src="static/img/fig_gate_help_share.png" alt="Share of helpful fixes rises with verdict confidence" loading="lazy"></div><p class="figcap">The share of helpful fixes rises with confidence. Dashed: the gate.</p></div>
     </div>
-    <div class="big3">
-      <div class="rv"><div class="n" style="color:var(--com)">≥ 2 : 1</div><div class="l">helpful to harmful fixes above the gate<small>SA-V 2 : 1, LVOS 2.6 : 1</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--com)">0.77 → 0.48</div><div class="l">help-vs-hurt AUROC on LVOS<small>when RL trains on the reward alone, without verdict supervision: chance level</small></div></div>
-      <div class="rv"><div class="n" style="color:var(--com)">0.11 vs 0.41</div><div class="l">calibration error (ECE) on LVOS<small>with vs without verdict supervision; SA-V: 0.05 vs 0.24</small></div></div>
-    </div>
+    <div class="cards3 res3" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<div class="panel pc rv"><h4>Without the verdict loss, confidence stops separating good fixes from bad</h4><p class="hint">Help-vs-hurt AUROC of the confidence p. Line: chance (0.5).</p><div class="mb pr">
+<div class="mr"><span>SA-V</span><div class="mt2"><b class="ch" style="--x:50.0%"></b><i style="--w:72.7%;--c:var(--com)"></i><i style="--w:62.1%;--c:#b9c2d3"></i></div><em><b>0.73</b> / 0.62</em></div>
+<div class="mr"><span>LVOS</span><div class="mt2"><b class="ch" style="--x:50.0%"></b><i style="--w:77.4%;--c:var(--com)"></i><i style="--w:48.1%;--c:#b9c2d3"></i></div><em><b>0.77</b> / 0.48</em></div><div class="lg"><span><i style="background:var(--com)"></i>final model</span><span><i style="background:#b9c2d3"></i>without verdict loss</span></div>
+</div></div>
+<div class="panel pc rv"><h4>… and becomes overconfident</h4><p class="hint">Calibration error (ECE) of p, lower is better.</p><div class="mb pr">
+<div class="mr"><span>SA-V</span><div class="mt2"><i style="--w:10.6%;--c:var(--com)"></i><i style="--w:48.6%;--c:#b9c2d3"></i></div><em><b>0.05</b> / 0.24</em></div>
+<div class="mr"><span>LVOS</span><div class="mt2"><i style="--w:21.4%;--c:var(--com)"></i><i style="--w:81.8%;--c:#b9c2d3"></i></div><em><b>0.11</b> / 0.41</em></div><div class="lg"><span><i style="background:var(--com)"></i>final model</span><span><i style="background:#b9c2d3"></i>without verdict loss</span></div>
+</div></div>
+</div>
   </div>
 </section>
 
